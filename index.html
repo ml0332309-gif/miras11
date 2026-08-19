@@ -1,0 +1,1861 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>مِراس - نظام التشغيل الذكي للمدارس والأكاديميات الرياضية</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<script>
+tailwind.config = {
+    theme: {
+        extend: {
+            fontFamily: { sans: ['Cairo','sans-serif'] },
+            colors: {
+                saudi: { 50:'#ecfdf3',100:'#d1fae1',200:'#a7f3c9',300:'#6ee7a8',400:'#34d38b',500:'#10b876',600:'#006C35',700:'#047a48',800:'#066036',900:'#064e2f' },
+                gold: { 50:'#fdf9f0',100:'#f9f0d8',200:'#f2e0b0',300:'#e8cc80',400:'#dbb556',500:'#C5A059',600:'#b08d3e',700:'#8f6f33',800:'#765a2f',900:'#634a2b' }
+            }
+        }
+    }
+}
+</script>
+<style>
+body{font-family:'Cairo',sans-serif;background:#F8FAFC;}
+.glass{background:rgba(255,255,255,.85);backdrop-filter:blur(16px);border:1px solid rgba(255,255,255,.6);box-shadow:0 4px 30px rgba(0,0,0,.05);}
+.glass-card{background:rgba(255,255,255,.7);backdrop-filter:blur(12px);border:1px solid rgba(255,255,255,.5);box-shadow:0 8px 32px rgba(0,108,53,.08);}
+.nav-link{position:relative;transition:all .3s ease;}
+.nav-link::after{content:'';position:absolute;bottom:-4px;right:0;width:0;height:2px;background:#006C35;transition:width .3s ease;border-radius:2px;}
+.nav-link:hover::after,.nav-link.active::after{width:100%;}
+.nav-link.active{color:#006C35;font-weight:700;}
+.fade-in-up{opacity:0;transform:translateY(30px);transition:all .6s ease-out;}
+.fade-in-up.visible{opacity:1;transform:translateY(0);}
+.scale-in{opacity:0;transform:scale(.9);transition:all .5s ease-out;}
+.scale-in.visible{opacity:1;transform:scale(1);}
+.pulse-dot{position:relative;}
+.pulse-dot::after{content:'';position:absolute;inset:-6px;border-radius:50%;border:2px solid currentColor;animation:pulseDot 2s infinite;}
+@keyframes pulseDot{0%{transform:scale(1);opacity:.5;}100%{transform:scale(1.8);opacity:0;}}
+.counter{font-variant-numeric:tabular-nums;}
+.score-circle{position:relative;width:140px;height:140px;}
+.score-circle svg{transform:rotate(-90deg);}
+.tab-btn2{padding:.75rem 1.25rem;border-radius:9999px;font-size:.875rem;font-weight:600;transition:all .3s;color:#64748b;background:transparent;}
+.tab-btn2.active{background:#006C35;color:#fff;box-shadow:0 4px 14px rgba(0,108,53,.3);}
+.tab-btn2:hover:not(.active){background:#ecfdf3;color:#006C35;}
+::-webkit-scrollbar{width:6px}::-webkit-scrollbar-track{background:#F8FAFC}::-webkit-scrollbar-thumb{background:#cbd5e1;border-radius:3px}
+.hero-glow{position:absolute;width:500px;height:500px;background:radial-gradient(circle,rgba(0,108,53,.15) 0%,transparent 70%);border-radius:50%;pointer-events:none;}
+.green-gradient{background:linear-gradient(135deg,#006C35 0%,#10b876 100%);}
+.gold-gradient{background:linear-gradient(135deg,#C5A059 0%,#dbb556 50%,#C5A059 100%);}
+.map-region{fill:#e2e8f0;stroke:#fff;stroke-width:1.5;cursor:pointer;transition:all .3s ease;}
+.map-region:hover{fill:#006C35;filter:drop-shadow(0 4px 12px rgba(0,108,53,.3));}
+.map-region.active{fill:#006C35;}
+.map-dot{fill:#EF4444;cursor:pointer;transition:all .3s;}
+.map-dot:hover{r:8;fill:#006C35;}
+.sport-pill{cursor:pointer;transition:all .2s;}
+.sport-pill:hover{transform:translateY(-2px);}
+.school-card{border:2px solid transparent;transition:all .3s;}
+.school-card:hover{border-color:#006C35;transform:translateY(-4px);}
+.login-card{cursor:pointer;transition:all .3s;border:2px solid transparent;}
+.login-card:hover{border-color:#006C35;transform:translateY(-4px);box-shadow:0 8px 32px rgba(0,108,53,.12);}
+.login-card.selected{border-color:#006C35;background:#ecfdf3;}
+.chat-bubble{max-width:80%;padding:12px 16px;border-radius:16px;font-size:14px;line-height:1.5;animation:fadeIn .3s ease;}
+.chat-bubble.sent{background:#006C35;color:white;border-bottom-left-radius:4px;margin-left:auto;}
+.chat-bubble.received{background:#f1f5f9;color:#1e293b;border-bottom-right-radius:4px;}
+.typing-indicator{display:flex;gap:4px;padding:12px 16px;background:#f1f5f9;border-radius:16px;border-bottom-right-radius:4px;width:fit-content;}
+.typing-indicator span{width:6px;height:6px;background:#94a3b8;border-radius:50%;animation:typingBounce 1.4s infinite ease-in-out both;}
+.typing-indicator span:nth-child(1){animation-delay:-0.32s;}
+.typing-indicator span:nth-child(2){animation-delay:-0.16s;}
+@keyframes typingBounce{0%,80%,100%{transform:scale(0);}40%{transform:scale(1);}}
+@keyframes fadeIn{from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
+.protected-screen{display:none;}
+.protected-screen.unlocked{display:block;}
+.trophy-glow{box-shadow:0 0 40px rgba(197,160,89,.3);}
+.match-row{transition:all .2s;}
+.match-row:hover{background:#f8fafc;}
+.countdown-box{background:linear-gradient(135deg,#1e293b 0%,#334155 100%);}
+.city-label{font-size:11px;font-family:Cairo,sans-serif;font-weight:700;fill:#1e293b;pointer-events:none;text-anchor:middle;}
+</style>
+<base target="_blank">
+</head>
+<body class="text-slate-800 antialiased">
+
+<!-- Navbar -->
+<nav id="navbar" class="fixed top-0 right-0 left-0 z-50 transition-all duration-300 bg-white/80 backdrop-blur-xl border-b border-slate-200/50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex items-center justify-between h-18 py-3">
+            <div class="flex items-center gap-3">
+<img src="miras1.png" alt="شعار مِراس" class="w-10 h-10 object-contain rounded-xl shadow-lg shadow-saudi-600/20">
+                <div><span class="text-xl font-bold text-slate-900">مِراس</span><span class="text-xs text-slate-500 block -mt-1">Miras OS</span></div>
+            </div>
+            <div class="hidden md:flex items-center gap-6">
+                <button onclick="showScreen('landing')" id="nav-landing" class="nav-link active text-sm font-medium text-slate-600">الرئيسية</button>
+                <button onclick="showScreen('cup')" id="nav-cup" class="nav-link text-sm font-medium text-slate-600 relative"><i class="fas fa-trophy ml-1 text-gold-500"></i>كأس مِراس</button>
+                <button onclick="showScreen('map')" id="nav-map" class="nav-link text-sm font-medium text-slate-600">الخريطة الوطنية</button>
+                <button onclick="showScreen('school')" id="nav-school" class="nav-link text-sm font-medium text-slate-600">لوحة المدرسة</button>
+                <button onclick="showScreen('coach')" id="nav-coach" class="nav-link text-sm font-medium text-slate-600">لوحة المدرب</button>
+                <button onclick="showScreen('athlete')" id="nav-athlete" class="nav-link text-sm font-medium text-slate-600">ملف اللاعب</button>
+                <button onclick="showScreen('parent')" id="nav-parent" class="nav-link text-sm font-medium text-slate-600">ولي الأمر</button>
+                <button onclick="showScreen('chat')" id="nav-chat" class="nav-link text-sm font-medium text-slate-600 relative"><i class="fas fa-comments ml-1"></i>الدردشة<span id="chat-badge" class="absolute -top-1 -left-2 w-5 h-5 bg-rose-500 text-white text-[10px] rounded-full flex items-center justify-center hidden">3</span></button>
+            </div>
+            <div class="flex items-center gap-3">
+                <span id="user-name" class="hidden text-sm font-bold text-saudi-700"></span>
+                <button id="login-btn" onclick="showScreen('login')" class="px-5 py-2 text-sm font-semibold text-white green-gradient rounded-full shadow-lg shadow-saudi-600/20 hover:shadow-xl transition-all">تسجيل الدخول</button>
+                <button id="logout-btn" onclick="logout()" class="hidden px-4 py-2 text-sm font-semibold text-rose-600 border border-rose-200 rounded-full hover:bg-rose-50 transition-all">خروج</button>
+            </div>
+            <button onclick="toggleMobileMenu()" class="md:hidden w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center text-slate-600"><i class="fas fa-bars"></i></button>
+        </div>
+    </div>
+    <div id="mobile-menu" class="hidden md:hidden bg-white border-t border-slate-100 px-4 py-4 space-y-2">
+        <button onclick="showScreen('landing');toggleMobileMenu()" class="w-full text-right px-4 py-3 rounded-xl hover:bg-slate-50 text-slate-700 font-medium">الرئيسية</button>
+        <button onclick="showScreen('cup');toggleMobileMenu()" class="w-full text-right px-4 py-3 rounded-xl hover:bg-slate-50 text-slate-700 font-medium"><i class="fas fa-trophy ml-2 text-gold-500"></i>كأس مِراس</button>
+        <button onclick="showScreen('map');toggleMobileMenu()" class="w-full text-right px-4 py-3 rounded-xl hover:bg-slate-50 text-slate-700 font-medium">الخريطة الوطنية</button>
+        <button onclick="showScreen('school');toggleMobileMenu()" class="w-full text-right px-4 py-3 rounded-xl hover:bg-slate-50 text-slate-700 font-medium">لوحة المدرسة</button>
+        <button onclick="showScreen('coach');toggleMobileMenu()" class="w-full text-right px-4 py-3 rounded-xl hover:bg-slate-50 text-slate-700 font-medium">لوحة المدرب</button>
+        <button onclick="showScreen('athlete');toggleMobileMenu()" class="w-full text-right px-4 py-3 rounded-xl hover:bg-slate-50 text-slate-700 font-medium">ملف اللاعب</button>
+        <button onclick="showScreen('parent');toggleMobileMenu()" class="w-full text-right px-4 py-3 rounded-xl hover:bg-slate-50 text-slate-700 font-medium">ولي الأمر</button>
+        <button onclick="showScreen('chat');toggleMobileMenu()" class="w-full text-right px-4 py-3 rounded-xl hover:bg-slate-50 text-slate-700 font-medium">الدردشة</button>
+    </div>
+</nav>
+
+<!-- ========== LANDING PAGE (DEFAULT) ========== -->
+<section id="screen-landing" class="screen-section pt-20">
+    <!-- Hero -->
+    <div class="relative overflow-hidden bg-gradient-to-br from-saudi-900 via-saudi-800 to-saudi-700 pt-20">
+        <div class="hero-glow top-20 left-20"></div>
+        <div class="hero-glow bottom-0 right-0" style="background:radial-gradient(circle,rgba(197,160,89,.12) 0%,transparent 70%)"></div>
+        <div class="absolute inset-0 opacity-10" style="background-image:url('data:image/svg+xml,%3Csvg width="60" height="60" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg"%3E%3Cg fill="none" fill-rule="evenodd"%3E%3Cg fill="%23ffffff" fill-opacity="1"%3E%3Cpath d="M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z"/%3E%3C/g%3E%3C/g%3E%3C/svg%3E')"></div>
+        <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 lg:py-28">
+            <div class="grid lg:grid-cols-2 gap-12 items-center">
+                <div class="text-center lg:text-right">
+                    <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/10 border border-white/20 text-gold-300 text-sm mb-6 backdrop-blur-sm">
+                        <span class="w-2 h-2 rounded-full bg-gold-400 animate-pulse"></span>النظام الذكي الأول من نوعه
+                    </div>
+                    <h1 class="text-4xl lg:text-6xl font-black text-white mb-6 leading-tight">
+                        نظام التشغيل الذكي<br>للمدارس والأكاديميات <span class="text-gold-400">الرياضية</span>
+                    </h1>
+                    <p class="text-lg text-slate-300 mb-8 leading-relaxed max-w-xl mx-auto lg:mx-0">
+                        منصة متكاملة تربط بين الأداء الرياضي، الصحة، التغذية، النوم، والتحصيل الدراسي باستخدام الذكاء الاصطناعي.
+                    </p>
+                    <div class="flex flex-wrap justify-center lg:justify-start gap-4">
+                        <button onclick="showScreen('cup')" class="px-8 py-3.5 bg-gold-500 text-white rounded-full font-bold shadow-xl hover:shadow-2xl hover:scale-105 transition-all"><i class="fas fa-trophy ml-2"></i>كأس مِراس 2026</button>
+                        <button onclick="showScreen('map')" class="px-8 py-3.5 bg-white/10 text-white border border-white/20 rounded-full font-bold backdrop-blur-sm hover:bg-white/20 transition-all">الخريطة الوطنية</button>
+                    </div>
+                </div>
+                <div class="flex justify-center lg:justify-end">
+                    <div class="relative">
+                        <div class="glass-card rounded-3xl p-6 w-80 shadow-2xl shadow-black/20 border border-white/40">
+                            <div class="flex items-center justify-between mb-4">
+                                <div class="flex items-center gap-2">
+<img src="miras1.png" alt="شعار مِراس" class="w-8 h-8 object-contain rounded-lg">                                    <span class="text-slate-700 font-bold text-sm">مِراس</span>
+                                </div>
+                                <span class="text-xs text-gold-600 bg-gold-50 px-2 py-1 rounded-full font-medium">بطاقة ذكية</span>
+                            </div>
+                            <div class="flex items-center gap-4 mb-5">
+                                <div class="w-16 h-16 rounded-2xl bg-saudi-600 flex items-center justify-center text-white text-2xl font-bold shadow-md">أخ</div>
+                                <div>
+                                    <p class="font-bold text-slate-800">أحمد الخالد</p>
+                                    <p class="text-xs text-slate-500">وسط مهاجم • أكاديمية النصر</p>
+                                    <p class="text-xs text-slate-400 mt-0.5">ID: MRS-2026-0892</p>
+                                </div>
+                            </div>
+                            <div class="grid grid-cols-2 gap-3">
+                                <div class="bg-saudi-50 rounded-xl p-3 text-center"><div class="text-xl font-black text-saudi-700">65</div><div class="text-[10px] text-slate-500">مؤشر مِراس</div></div>
+                                <div class="bg-gold-50 rounded-xl p-3 text-center"><div class="text-xl font-black text-gold-600">78%</div><div class="text-[10px] text-slate-500">الجاهزية</div></div>
+                            </div>
+                        </div>
+                        <div class="absolute -top-4 -left-8 glass-card rounded-2xl px-4 py-2 shadow-lg animate-bounce" style="animation-duration:3s">
+                            <div class="flex items-center gap-2"><i class="fas fa-brain text-saudi-600"></i><span class="text-xs font-bold text-slate-700">AI تحليل</span></div>
+                        </div>
+                        <div class="absolute -bottom-4 -right-6 glass-card rounded-2xl px-4 py-2 shadow-lg animate-bounce" style="animation-duration:2.5s">
+                            <div class="flex items-center gap-2"><i class="fas fa-shield-alt text-gold-500"></i><span class="text-xs font-bold text-slate-700">حماية البيانات</span></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="absolute bottom-0 left-0 right-0"><svg viewBox="0 0 1440 120" fill="none"><path d="M0 120L60 110C120 100 240 80 360 70C480 60 600 60 720 65C840 70 960 80 1080 85C1200 90 1320 90 1380 90L1440 90V120H1380C1320 120 1200 120 1080 120C960 120 840 120 720 120C600 120 480 120 360 120C240 120 120 120 60 120H0Z" fill="#F8FAFC"/></svg></div>
+    </div>
+
+    <!-- Stats Counter -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-10 relative z-10">
+        <div class="glass rounded-3xl p-8 shadow-xl shadow-slate-200/50">
+            <div class="grid grid-cols-2 lg:grid-cols-5 gap-8">
+                <div class="text-center fade-in-up">
+                    <div class="w-14 h-14 mx-auto mb-3 rounded-2xl bg-saudi-50 flex items-center justify-center"><i class="fas fa-users text-2xl text-saudi-600"></i></div>
+                    <div class="text-3xl font-black text-slate-800 counter" data-target="54720">0</div>
+                    <div class="text-sm text-slate-500 mt-1">رياضي مسجل</div>
+                </div>
+                <div class="text-center fade-in-up" style="transition-delay:.1s">
+                    <div class="w-14 h-14 mx-auto mb-3 rounded-2xl bg-gold-50 flex items-center justify-center"><i class="fas fa-school text-2xl text-gold-600"></i></div>
+                    <div class="text-3xl font-black text-slate-800 counter" data-target="184">0</div>
+                    <div class="text-sm text-slate-500 mt-1">أكاديمية</div>
+                </div>
+                <div class="text-center fade-in-up" style="transition-delay:.15s">
+                    <div class="w-14 h-14 mx-auto mb-3 rounded-2xl bg-blue-50 flex items-center justify-center"><i class="fas fa-building text-2xl text-blue-600"></i></div>
+                    <div class="text-3xl font-black text-slate-800 counter" data-target="312">0</div>
+                    <div class="text-sm text-slate-500 mt-1">مدرسة مشتركة</div>
+                </div>
+                <div class="text-center fade-in-up" style="transition-delay:.2s">
+                    <div class="w-14 h-14 mx-auto mb-3 rounded-2xl bg-emerald-50 flex items-center justify-center"><i class="fas fa-star text-2xl text-emerald-600"></i></div>
+                    <div class="text-3xl font-black text-slate-800 counter" data-target="8934">0</div>
+                    <div class="text-sm text-slate-500 mt-1">موهبة مكتشفة</div>
+                </div>
+                <div class="text-center fade-in-up" style="transition-delay:.3s">
+                    <div class="w-14 h-14 mx-auto mb-3 rounded-2xl bg-rose-50 flex items-center justify-center"><i class="fas fa-trophy text-2xl text-rose-600"></i></div>
+                    <div class="text-3xl font-black text-slate-800 counter" data-target="1256">0</div>
+                    <div class="text-sm text-slate-500 mt-1">بطولة</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Miras Cup Banner -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <div onclick="showScreen('cup')" class="gold-gradient rounded-3xl p-8 lg:p-10 relative overflow-hidden cursor-pointer hover:shadow-2xl hover:shadow-gold-500/20 transition-all fade-in-up group">
+            <div class="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full -mr-20 -mt-20"></div>
+            <div class="absolute bottom-0 left-0 w-48 h-48 bg-white/5 rounded-full -ml-10 -mb-10"></div>
+            <div class="relative z-10 flex flex-col lg:flex-row items-center justify-between gap-6">
+                <div class="flex items-center gap-6">
+                    <div class="w-20 h-20 rounded-2xl bg-white/20 flex items-center justify-center text-4xl">🏆</div>
+                    <div>
+                        <h2 class="text-3xl font-black text-white mb-2">كأس مِراس 2026</h2>
+                        <p class="text-white/80 text-lg">بطولة دوري مفتوحة للجميع - فرصة ذهبية للاحتراف في أندية الدرجة الأولى والثانية</p>
+                        <div class="flex gap-4 mt-3">
+                            <span class="px-3 py-1 bg-white/20 text-white rounded-full text-sm font-bold"><i class="fas fa-calendar ml-1"></i>1 سبتمبر - 15 ديسمبر 2026</span>
+                            <span class="px-3 py-1 bg-white/20 text-white rounded-full text-sm font-bold"><i class="fas fa-users ml-1"></i>64 فريق مشارك</span>
+                        </div>
+                    </div>
+                </div>
+                <button class="px-8 py-4 bg-white text-gold-700 rounded-full font-bold shadow-xl group-hover:scale-105 transition-all shrink-0">اكتشف البطولة <i class="fas fa-arrow-left mr-2"></i></button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Schools Section -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <div class="text-center mb-12 fade-in-up">
+            <span class="inline-block px-4 py-1.5 rounded-full bg-blue-50 text-blue-700 text-sm font-semibold mb-4">برنامج المدارس</span>
+            <h2 class="text-3xl lg:text-4xl font-black text-slate-900 mb-4">المدارس السعودية تشارك في مِراس</h2>
+            <p class="text-slate-500 text-lg max-w-2xl mx-auto">مِراس لا يقتصر على الأكاديميات الرياضية فقط. أي مدرسة عادية يمكنها تسجيل طلابها المواهب ليتبناهم النظام ويتابع تطورهم.</p>
+        </div>
+        <div class="grid md:grid-cols-3 gap-6 mb-12">
+            <div class="school-card glass-card rounded-3xl p-6 text-center fade-in-up">
+                <div class="w-16 h-16 mx-auto mb-4 rounded-2xl bg-blue-50 flex items-center justify-center"><i class="fas fa-school text-2xl text-blue-600"></i></div>
+                <h3 class="font-bold text-slate-900 mb-2">تسجيل المدرسة</h3>
+                <p class="text-sm text-slate-500 leading-relaxed">أي مدرسة ابتدائية أو متوسطة أو ثانوية يمكنها فتح حساب وإدخال بيانات طلابها الرياضيين.</p>
+            </div>
+            <div class="school-card glass-card rounded-3xl p-6 text-center fade-in-up" style="transition-delay:.05s">
+                <div class="w-16 h-16 mx-auto mb-4 rounded-2xl bg-saudi-50 flex items-center justify-center"><i class="fas fa-search text-2xl text-saudi-600"></i></div>
+                <h3 class="font-bold text-slate-900 mb-2">اكتشاف المواهب</h3>
+                <p class="text-sm text-slate-500 leading-relaxed">النظام يكتشف الطلاب الموهوبين في مختلف الرياضات: كرة القدم، السلة، التنس، السباحة، الفنون القتالية...</p>
+            </div>
+            <div class="school-card glass-card rounded-3xl p-6 text-center fade-in-up" style="transition-delay:.1s">
+                <div class="w-16 h-16 mx-auto mb-4 rounded-2xl bg-gold-50 flex items-center justify-center"><i class="fas fa-hand-holding-heart text-2xl text-gold-600"></i></div>
+                <h3 class="font-bold text-slate-900 mb-2">يتبنى مِراس الطالب</h3>
+                <p class="text-sm text-slate-500 leading-relaxed">بمجرد اكتشاف الموهبة، يتبنى النظام الطالب ويربطه بالأكاديميات المناسبة ويقدم له خطة تطوير مخصصة.</p>
+            </div>
+        </div>
+
+        <div class="glass-card rounded-3xl p-8 border border-blue-200/50 fade-in-up">
+            <h3 class="text-2xl font-black text-slate-900 mb-6 text-center">المدارس المشاركة في مِراس</h3>
+            <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div class="p-4 bg-slate-50 rounded-2xl border border-slate-100 hover:border-saudi-300 transition-all">
+                    <div class="flex items-center gap-3 mb-2"><div class="w-10 h-10 rounded-xl bg-saudi-100 flex items-center justify-center"><i class="fas fa-school text-saudi-600"></i></div><div><p class="font-bold text-slate-800 text-sm">مدرسة النور الابتدائية</p><p class="text-xs text-slate-400">الرياض</p></div></div>
+                    <div class="flex gap-2 mt-3"><span class="px-2 py-1 bg-saudi-50 text-saudi-700 text-xs rounded-lg font-bold">5 لاعبين</span><span class="px-2 py-1 bg-gold-50 text-gold-700 text-xs rounded-lg font-bold">كرة القدم</span></div>
+                </div>
+                <div class="p-4 bg-slate-50 rounded-2xl border border-slate-100 hover:border-saudi-300 transition-all">
+                    <div class="flex items-center gap-3 mb-2"><div class="w-10 h-10 rounded-xl bg-blue-100 flex items-center justify-center"><i class="fas fa-school text-blue-600"></i></div><div><p class="font-bold text-slate-800 text-sm">مدرسة الرياض المتوسطة</p><p class="text-xs text-slate-400">الرياض</p></div></div>
+                    <div class="flex gap-2 mt-3"><span class="px-2 py-1 bg-blue-50 text-blue-700 text-xs rounded-lg font-bold">3 لاعبين</span><span class="px-2 py-1 bg-orange-50 text-orange-700 text-xs rounded-lg font-bold">كرة السلة</span></div>
+                </div>
+                <div class="p-4 bg-slate-50 rounded-2xl border border-slate-100 hover:border-saudi-300 transition-all">
+                    <div class="flex items-center gap-3 mb-2"><div class="w-10 h-10 rounded-xl bg-amber-100 flex items-center justify-center"><i class="fas fa-school text-amber-600"></i></div><div><p class="font-bold text-slate-800 text-sm">مدرسة الفيصلية الثانوية</p><p class="text-xs text-slate-400">جدة</p></div></div>
+                    <div class="flex gap-2 mt-3"><span class="px-2 py-1 bg-amber-50 text-amber-700 text-xs rounded-lg font-bold">2 لاعبين</span><span class="px-2 py-1 bg-yellow-50 text-yellow-700 text-xs rounded-lg font-bold">التنس</span></div>
+                </div>
+                <div class="p-4 bg-slate-50 rounded-2xl border border-slate-100 hover:border-saudi-300 transition-all">
+                    <div class="flex items-center gap-3 mb-2"><div class="w-10 h-10 rounded-xl bg-emerald-100 flex items-center justify-center"><i class="fas fa-school text-emerald-600"></i></div><div><p class="font-bold text-slate-800 text-sm">مدرسة أبها النموذجية</p><p class="text-xs text-slate-400">أبها</p></div></div>
+                    <div class="flex gap-2 mt-3"><span class="px-2 py-1 bg-emerald-50 text-emerald-700 text-xs rounded-lg font-bold">4 لاعبين</span><span class="px-2 py-1 bg-red-50 text-red-700 text-xs rounded-lg font-bold">فنون قتالية</span></div>
+                </div>
+                <div class="p-4 bg-slate-50 rounded-2xl border border-slate-100 hover:border-saudi-300 transition-all">
+                    <div class="flex items-center gap-3 mb-2"><div class="w-10 h-10 rounded-xl bg-cyan-100 flex items-center justify-center"><i class="fas fa-school text-cyan-600"></i></div><div><p class="font-bold text-slate-800 text-sm">مدرسة الدمام الحديثة</p><p class="text-xs text-slate-400">الدمام</p></div></div>
+                    <div class="flex gap-2 mt-3"><span class="px-2 py-1 bg-cyan-50 text-cyan-700 text-xs rounded-lg font-bold">3 لاعبين</span><span class="px-2 py-1 bg-cyan-50 text-cyan-700 text-xs rounded-lg font-bold">السباحة</span></div>
+                </div>
+                <div class="p-4 bg-slate-50 rounded-2xl border border-slate-100 hover:border-saudi-300 transition-all">
+                    <div class="flex items-center gap-3 mb-2"><div class="w-10 h-10 rounded-xl bg-purple-100 flex items-center justify-center"><i class="fas fa-school text-purple-600"></i></div><div><p class="font-bold text-slate-800 text-sm">مدرسة التحفيظ</p><p class="text-xs text-slate-400">مكة</p></div></div>
+                    <div class="flex gap-2 mt-3"><span class="px-2 py-1 bg-purple-50 text-purple-700 text-xs rounded-lg font-bold">2 لاعبين</span><span class="px-2 py-1 bg-red-50 text-red-700 text-xs rounded-lg font-bold">فنون قتالية</span></div>
+                </div>
+                <div class="p-4 bg-slate-50 rounded-2xl border border-slate-100 hover:border-saudi-300 transition-all">
+                    <div class="flex items-center gap-3 mb-2"><div class="w-10 h-10 rounded-xl bg-rose-100 flex items-center justify-center"><i class="fas fa-school text-rose-600"></i></div><div><p class="font-bold text-slate-800 text-sm">أكاديمية النصر</p><p class="text-xs text-slate-400">الرياض</p></div></div>
+                    <div class="flex gap-2 mt-3"><span class="px-2 py-1 bg-rose-50 text-rose-700 text-xs rounded-lg font-bold">8 لاعبين</span><span class="px-2 py-1 bg-saudi-50 text-saudi-700 text-xs rounded-lg font-bold">كرة القدم</span></div>
+                </div>
+                <div class="p-4 bg-slate-50 rounded-2xl border border-slate-100 hover:border-saudi-300 transition-all">
+                    <div class="flex items-center gap-3 mb-2"><div class="w-10 h-10 rounded-xl bg-indigo-100 flex items-center justify-center"><i class="fas fa-school text-indigo-600"></i></div><div><p class="font-bold text-slate-800 text-sm">أكاديمية الهلال</p><p class="text-xs text-slate-400">الرياض</p></div></div>
+                    <div class="flex gap-2 mt-3"><span class="px-2 py-1 bg-indigo-50 text-indigo-700 text-xs rounded-lg font-bold">6 لاعبين</span><span class="px-2 py-1 bg-saudi-50 text-saudi-700 text-xs rounded-lg font-bold">كرة القدم</span></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sports Diversity -->
+    <div class="bg-white py-20">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-12 fade-in-up">
+                <span class="inline-block px-4 py-1.5 rounded-full bg-saudi-50 text-saudi-700 text-sm font-semibold mb-4">تنوع الرياضات</span>
+                <h2 class="text-3xl font-black text-slate-900 mb-4">مِراس يدعم جميع الرياضات</h2>
+                <p class="text-slate-500 max-w-2xl mx-auto">ليس فقط كرة القدم. مِراس يغطي أكثر من 20 رياضة مختلفة</p>
+            </div>
+            <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+                <div class="glass-card rounded-2xl p-4 text-center hover:shadow-lg transition-all cursor-pointer fade-in-up">
+                    <div class="w-12 h-12 mx-auto mb-2 rounded-xl bg-saudi-50 flex items-center justify-center"><i class="fas fa-futbol text-xl text-saudi-600"></i></div>
+                    <p class="text-sm font-bold text-slate-800">كرة القدم</p><p class="text-xs text-slate-400">18,420 لاعب</p>
+                </div>
+                <div class="glass-card rounded-2xl p-4 text-center hover:shadow-lg transition-all cursor-pointer fade-in-up" style="transition-delay:.03s">
+                    <div class="w-12 h-12 mx-auto mb-2 rounded-xl bg-orange-50 flex items-center justify-center"><i class="fas fa-basketball-ball text-xl text-orange-600"></i></div>
+                    <p class="text-sm font-bold text-slate-800">كرة السلة</p><p class="text-xs text-slate-400">8,920 لاعب</p>
+                </div>
+                <div class="glass-card rounded-2xl p-4 text-center hover:shadow-lg transition-all cursor-pointer fade-in-up" style="transition-delay:.06s">
+                    <div class="w-12 h-12 mx-auto mb-2 rounded-xl bg-yellow-50 flex items-center justify-center"><i class="fas fa-table-tennis text-xl text-yellow-600"></i></div>
+                    <p class="text-sm font-bold text-slate-800">التنس</p><p class="text-xs text-slate-400">3,450 لاعب</p>
+                </div>
+                <div class="glass-card rounded-2xl p-4 text-center hover:shadow-lg transition-all cursor-pointer fade-in-up" style="transition-delay:.09s">
+                    <div class="w-12 h-12 mx-auto mb-2 rounded-xl bg-red-50 flex items-center justify-center"><i class="fas fa-fist-raised text-xl text-red-600"></i></div>
+                    <p class="text-sm font-bold text-slate-800">فنون قتالية</p><p class="text-xs text-slate-400">5,120 لاعب</p>
+                </div>
+                <div class="glass-card rounded-2xl p-4 text-center hover:shadow-lg transition-all cursor-pointer fade-in-up" style="transition-delay:.12s">
+                    <div class="w-12 h-12 mx-auto mb-2 rounded-xl bg-cyan-50 flex items-center justify-center"><i class="fas fa-swimmer text-xl text-cyan-600"></i></div>
+                    <p class="text-sm font-bold text-slate-800">السباحة</p><p class="text-xs text-slate-400">4,780 لاعب</p>
+                </div>
+                <div class="glass-card rounded-2xl p-4 text-center hover:shadow-lg transition-all cursor-pointer fade-in-up" style="transition-delay:.15s">
+                    <div class="w-12 h-12 mx-auto mb-2 rounded-xl bg-purple-50 flex items-center justify-center"><i class="fas fa-running text-xl text-purple-600"></i></div>
+                    <p class="text-sm font-bold text-slate-800">ألعاب القوى</p><p class="text-xs text-slate-400">6,340 لاعب</p>
+                </div>
+                <div class="glass-card rounded-2xl p-4 text-center hover:shadow-lg transition-all cursor-pointer fade-in-up" style="transition-delay:.18s">
+                    <div class="w-12 h-12 mx-auto mb-2 rounded-xl bg-indigo-50 flex items-center justify-center"><i class="fas fa-volleyball-ball text-xl text-indigo-600"></i></div>
+                    <p class="text-sm font-bold text-slate-800">الكرة الطائرة</p><p class="text-xs text-slate-400">2,890 لاعب</p>
+                </div>
+                <div class="glass-card rounded-2xl p-4 text-center hover:shadow-lg transition-all cursor-pointer fade-in-up" style="transition-delay:.21s">
+                    <div class="w-12 h-12 mx-auto mb-2 rounded-xl bg-pink-50 flex items-center justify-center"><i class="fas fa-chess text-xl text-pink-600"></i></div>
+                    <p class="text-sm font-bold text-slate-800">الشطرنج</p><p class="text-xs text-slate-400">1,230 لاعب</p>
+                </div>
+                <div class="glass-card rounded-2xl p-4 text-center hover:shadow-lg transition-all cursor-pointer fade-in-up" style="transition-delay:.24s">
+                    <div class="w-12 h-12 mx-auto mb-2 rounded-xl bg-teal-50 flex items-center justify-center"><i class="fas fa-biking text-xl text-teal-600"></i></div>
+                    <p class="text-sm font-bold text-slate-800">الدراجات</p><p class="text-xs text-slate-400">1,560 لاعب</p>
+                </div>
+                <div class="glass-card rounded-2xl p-4 text-center hover:shadow-lg transition-all cursor-pointer fade-in-up" style="transition-delay:.27s">
+                    <div class="w-12 h-12 mx-auto mb-2 rounded-xl bg-amber-50 flex items-center justify-center"><i class="fas fa-golf-ball text-xl text-amber-600"></i></div>
+                    <p class="text-sm font-bold text-slate-800">الجولف</p><p class="text-xs text-slate-400">890 لاعب</p>
+                </div>
+                <div class="glass-card rounded-2xl p-4 text-center hover:shadow-lg transition-all cursor-pointer fade-in-up" style="transition-delay:.3s">
+                    <div class="w-12 h-12 mx-auto mb-2 rounded-xl bg-rose-50 flex items-center justify-center"><i class="fas fa-hand-rock text-xl text-rose-600"></i></div>
+                    <p class="text-sm font-bold text-slate-800">رفع أثقال</p><p class="text-xs text-slate-400">2,100 لاعب</p>
+                </div>
+                <div class="glass-card rounded-2xl p-4 text-center hover:shadow-lg transition-all cursor-pointer fade-in-up" style="transition-delay:.33s">
+                    <div class="w-12 h-12 mx-auto mb-2 rounded-xl bg-slate-50 flex items-center justify-center"><i class="fas fa-ellipsis-h text-xl text-slate-600"></i></div>
+                    <p class="text-sm font-bold text-slate-800">ومزيد...</p><p class="text-xs text-slate-400">+8 رياضات</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Miras Score -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20">
+        <div class="text-center mb-16 fade-in-up">
+            <span class="inline-block px-4 py-1.5 rounded-full bg-saudi-50 text-saudi-700 text-sm font-semibold mb-4">مؤشر مِراس الذكي</span>
+            <h2 class="text-3xl lg:text-4xl font-black text-slate-900 mb-4">تقييم شامل لكل جانب من جوانب الرياضي</h2>
+            <p class="text-slate-500 text-lg max-w-2xl mx-auto">يجمع الذكاء الاصطناعي بين البيانات الرياضية والصحية والدراسية لإعطاء رقم واحد يعكس الجاهزية الشاملة</p>
+        </div>
+        <div class="grid md:grid-cols-5 gap-4 mb-12">
+            <div class="glass-card rounded-3xl p-6 text-center fade-in-up hover:shadow-xl hover:shadow-saudi-600/10 transition-all cursor-pointer group">
+                <div class="w-16 h-16 mx-auto mb-4 rounded-2xl bg-saudi-50 flex items-center justify-center group-hover:scale-110 transition-transform"><i class="fas fa-running text-2xl text-saudi-600"></i></div>
+                <h3 class="font-bold text-slate-800 mb-1">الأداء الرياضي</h3><div class="text-2xl font-black text-saudi-600">25%</div><p class="text-xs text-slate-500 mt-1">السرعة، القوة، التحمل</p>
+            </div>
+            <div class="glass-card rounded-3xl p-6 text-center fade-in-up hover:shadow-xl hover:shadow-indigo-500/10 transition-all cursor-pointer group" style="transition-delay:.05s">
+                <div class="w-16 h-16 mx-auto mb-4 rounded-2xl bg-indigo-50 flex items-center justify-center group-hover:scale-110 transition-transform"><i class="fas fa-bed text-2xl text-indigo-600"></i></div>
+                <h3 class="font-bold text-slate-800 mb-1">النوم</h3><div class="text-2xl font-black text-indigo-600">20%</div><p class="text-xs text-slate-500 mt-1">الجودة، الساعات، العمق</p>
+            </div>
+            <div class="glass-card rounded-3xl p-6 text-center fade-in-up hover:shadow-xl hover:shadow-emerald-500/10 transition-all cursor-pointer group" style="transition-delay:.1s">
+                <div class="w-16 h-16 mx-auto mb-4 rounded-2xl bg-emerald-50 flex items-center justify-center group-hover:scale-110 transition-transform"><i class="fas fa-apple-alt text-2xl text-emerald-600"></i></div>
+                <h3 class="font-bold text-slate-800 mb-1">التغذية</h3><div class="text-2xl font-black text-emerald-600">20%</div><p class="text-xs text-slate-500 mt-1">السعرات، البروتين، الماء</p>
+            </div>
+            <div class="glass-card rounded-3xl p-6 text-center fade-in-up hover:shadow-xl hover:shadow-cyan-500/10 transition-all cursor-pointer group" style="transition-delay:.15s">
+                <div class="w-16 h-16 mx-auto mb-4 rounded-2xl bg-cyan-50 flex items-center justify-center group-hover:scale-110 transition-transform"><i class="fas fa-heartbeat text-2xl text-cyan-600"></i></div>
+                <h3 class="font-bold text-slate-800 mb-1">التعافي</h3><div class="text-2xl font-black text-cyan-600">20%</div><p class="text-xs text-slate-500 mt-1">معدل النبض، الإرهاق</p>
+            </div>
+            <div class="glass-card rounded-3xl p-6 text-center fade-in-up hover:shadow-xl hover:shadow-amber-500/10 transition-all cursor-pointer group" style="transition-delay:.2s">
+                <div class="w-16 h-16 mx-auto mb-4 rounded-2xl bg-amber-50 flex items-center justify-center group-hover:scale-110 transition-transform"><i class="fas fa-graduation-cap text-2xl text-amber-600"></i></div>
+                <h3 class="font-bold text-slate-800 mb-1">التحصيل الدراسي</h3><div class="text-2xl font-black text-amber-600">15%</div><p class="text-xs text-slate-500 mt-1">الحضور، الدرجات</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Role Selection Section (MOVED TO BOTTOM) -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+        <div class="text-center mb-10 fade-in-up">
+            <span class="inline-block px-4 py-1.5 rounded-full bg-saudi-50 text-saudi-700 text-sm font-semibold mb-4">الوصول السريع</span>
+            <h2 class="text-3xl font-black text-slate-900 mb-3">اختر نوع حسابك للبدء</h2>
+            <p class="text-slate-500 max-w-xl mx-auto">سجّل الدخول باستخدام حسابك المخصص للوصول إلى لوحة التحكم الخاصة بك</p>
+        </div>
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-5 mb-8 max-w-4xl mx-auto">
+            <div class="login-card glass-card rounded-2xl p-6 text-center" onclick="showScreen('login');selectLoginType('school')">
+                <div class="w-14 h-14 mx-auto mb-3 rounded-2xl bg-blue-50 flex items-center justify-center"><i class="fas fa-school text-2xl text-blue-600"></i></div>
+                <h3 class="font-bold text-slate-900">حساب مدرسة</h3>
+                <p class="text-xs text-slate-500 mt-1">إدارة الطلاب والمواهب</p>
+            </div>
+            <div class="login-card glass-card rounded-2xl p-6 text-center" onclick="showScreen('login');selectLoginType('coach')">
+                <div class="w-14 h-14 mx-auto mb-3 rounded-2xl bg-saudi-50 flex items-center justify-center"><i class="fas fa-user-tie text-2xl text-saudi-600"></i></div>
+                <h3 class="font-bold text-slate-900">حساب مدرب</h3>
+                <p class="text-xs text-slate-500 mt-1">متابعة اللاعبين والتقارير</p>
+            </div>
+            <div class="login-card glass-card rounded-2xl p-6 text-center" onclick="showScreen('login');selectLoginType('parent')">
+                <div class="w-14 h-14 mx-auto mb-3 rounded-2xl bg-gold-50 flex items-center justify-center"><i class="fas fa-user-friends text-2xl text-gold-600"></i></div>
+                <h3 class="font-bold text-slate-900">حساب ولي أمر</h3>
+                <p class="text-xs text-slate-500 mt-1">متابعة أداء الابن</p>
+            </div>
+            <div class="login-card glass-card rounded-2xl p-6 text-center" onclick="showScreen('login');selectLoginType('athlete')">
+                <div class="w-14 h-14 mx-auto mb-3 rounded-2xl bg-emerald-50 flex items-center justify-center"><i class="fas fa-running text-2xl text-emerald-600"></i></div>
+                <h3 class="font-bold text-slate-900">حساب لاعب</h3>
+                <p class="text-xs text-slate-500 mt-1">الملف الشخصي والتطور</p>
+            </div>
+        </div>
+        <div class="text-center">
+            <button onclick="guestLogin()" class="text-slate-500 hover:text-saudi-700 font-medium transition-all px-6 py-3 rounded-full border border-slate-200 hover:border-saudi-300"><i class="fas fa-user-clock ml-2"></i>تصفح كزائر بدون تسجيل</button>
+        </div>
+    </div>
+
+    <!-- CTA -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <div class="green-gradient rounded-3xl p-10 lg:p-16 text-center relative overflow-hidden fade-in-up">
+            <div class="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full -mr-20 -mt-20"></div>
+            <div class="absolute bottom-0 left-0 w-48 h-48 bg-white/5 rounded-full -ml-10 -mb-10"></div>
+            <h2 class="text-3xl lg:text-4xl font-black text-white mb-4 relative z-10">ابدأ رحلة ابنك الرياضية اليوم</h2>
+            <p class="text-slate-200 max-w-xl mx-auto mb-8 relative z-10">انضم لآلاف الأكاديميات والمدارس التي تستخدم مِراس لتطوير أداء طلابها وتحقيق التوازن بين الرياضة والدراسة</p>
+            <button onclick="showScreen('coach')" class="px-10 py-4 bg-white text-saudi-800 rounded-full font-bold shadow-xl hover:shadow-2xl hover:scale-105 transition-all relative z-10">استكشف لوحة التحكم</button>
+        </div>
+    </div>
+</section>
+
+<!-- ========== MIRAS CUP PAGE ========== -->
+<section id="screen-cup" class="screen-section hidden pt-20">
+    <!-- Hero -->
+    <div class="relative overflow-hidden bg-gradient-to-br from-slate-900 via-slate-800 to-slate-700 pt-24 pb-16">
+        <div class="absolute inset-0 opacity-10" style="background-image:url('data:image/svg+xml,%3Csvg width="60" height="60" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg"%3E%3Cg fill="none" fill-rule="evenodd"%3E%3Cg fill="%23ffffff" fill-opacity="1"%3E%3Cpath d="M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z"/%3E%3C/g%3E%3C/g%3E%3C/svg%3E')"></div>
+        <div class="absolute top-10 left-10 w-40 h-40 bg-gold-500/20 rounded-full blur-3xl"></div>
+        <div class="absolute bottom-10 right-10 w-60 h-60 bg-saudi-500/20 rounded-full blur-3xl"></div>
+        <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center">
+                <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gold-500/20 border border-gold-400/30 text-gold-300 text-sm mb-6 backdrop-blur-sm">
+                    <span class="w-2 h-2 rounded-full bg-gold-400 animate-pulse"></span>البطولة الأكبر للمواهب الرياضية
+                </div>
+                <div class="flex justify-center mb-6">
+                    <div class="w-24 h-24 rounded-3xl gold-gradient flex items-center justify-center text-4xl shadow-2xl shadow-gold-500/30 trophy-glow">🏆</div>
+                </div>
+                <h1 class="text-4xl lg:text-6xl font-black text-white mb-4">كأس مِراس 2026</h1>
+                <p class="text-lg text-slate-300 mb-8 max-w-2xl mx-auto leading-relaxed">بطولة دوري مفتوحة ومميزة للجميع - أفراد وفرق - بنظام تنافسي ومواعيد محددة. الفائز يحصل على فرصة ذهبية للاحتراف في أندية الدرجة الأولى والثانية.</p>
+                <div class="flex flex-wrap justify-center gap-4">
+                    <button onclick="scrollToSection('cup-register')" class="px-8 py-3.5 bg-gold-500 text-white rounded-full font-bold shadow-xl hover:shadow-2xl hover:scale-105 transition-all">سجّل فريقك الآن</button>
+                    <button onclick="scrollToSection('cup-schedule')" class="px-8 py-3.5 bg-white/10 text-white border border-white/20 rounded-full font-bold backdrop-blur-sm hover:bg-white/20 transition-all">جدول المباريات</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Countdown + Info -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-8 relative z-10">
+        <div class="grid lg:grid-cols-3 gap-6">
+            <!-- Countdown -->
+            <div class="lg:col-span-2 countdown-box rounded-3xl p-8 text-white shadow-2xl">
+                <div class="flex items-center justify-between mb-6">
+                    <h3 class="text-xl font-black"><i class="fas fa-clock ml-2 text-gold-400"></i>العد التنازلي لانطلاق البطولة</h3>
+                    <span class="px-3 py-1 bg-gold-500/20 text-gold-300 rounded-full text-sm font-bold border border-gold-500/30">1 سبتمبر 2026</span>
+                </div>
+                <div class="grid grid-cols-4 gap-4">
+                    <div class="text-center p-4 bg-white/10 rounded-2xl backdrop-blur-sm">
+                        <div class="text-4xl font-black text-gold-400" id="cd-days">12</div>
+                        <div class="text-sm text-slate-300 mt-1">يوم</div>
+                    </div>
+                    <div class="text-center p-4 bg-white/10 rounded-2xl backdrop-blur-sm">
+                        <div class="text-4xl font-black text-gold-400" id="cd-hours">08</div>
+                        <div class="text-sm text-slate-300 mt-1">ساعة</div>
+                    </div>
+                    <div class="text-center p-4 bg-white/10 rounded-2xl backdrop-blur-sm">
+                        <div class="text-4xl font-black text-gold-400" id="cd-minutes">45</div>
+                        <div class="text-sm text-slate-300 mt-1">دقيقة</div>
+                    </div>
+                    <div class="text-center p-4 bg-white/10 rounded-2xl backdrop-blur-sm">
+                        <div class="text-4xl font-black text-gold-400" id="cd-seconds">30</div>
+                        <div class="text-sm text-slate-300 mt-1">ثانية</div>
+                    </div>
+                </div>
+            </div>
+            <!-- Quick Stats -->
+            <div class="glass-card rounded-3xl p-6">
+                <h3 class="text-lg font-black text-slate-900 mb-4">نبذة سريعة</h3>
+                <div class="space-y-4">
+                    <div class="flex items-center gap-3"><div class="w-10 h-10 rounded-xl bg-saudi-50 flex items-center justify-center"><i class="fas fa-calendar text-saudi-600"></i></div><div><p class="text-sm font-bold text-slate-800">المدة</p><p class="text-xs text-slate-500">3.5 أشهر (سبتمبر - ديسمبر)</p></div></div>
+                    <div class="flex items-center gap-3"><div class="w-10 h-10 rounded-xl bg-gold-50 flex items-center justify-center"><i class="fas fa-users text-gold-600"></i></div><div><p class="text-sm font-bold text-slate-800">المشاركون</p><p class="text-xs text-slate-500">64 فريق - 512 لاعب</p></div></div>
+                    <div class="flex items-center gap-3"><div class="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center"><i class="fas fa-map-marker-alt text-blue-600"></i></div><div><p class="text-sm font-bold text-slate-800">الموقع</p><p class="text-xs text-slate-500">الرياض - جدة - الدمام</p></div></div>
+                    <div class="flex items-center gap-3"><div class="w-10 h-10 rounded-xl bg-rose-50 flex items-center justify-center"><i class="fas fa-trophy text-rose-600"></i></div><div><p class="text-sm font-bold text-slate-800">الجائزة</p><p class="text-xs text-slate-500">كأس + فرصة احترافية</p></div></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Prize Section -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+        <div class="text-center mb-12 fade-in-up">
+            <span class="inline-block px-4 py-1.5 rounded-full bg-gold-50 text-gold-700 text-sm font-semibold mb-4">الجائزة الكبرى</span>
+            <h2 class="text-3xl lg:text-4xl font-black text-slate-900 mb-4">فرصة ذهبية للاحتراف</h2>
+            <p class="text-slate-500 text-lg max-w-2xl mx-auto">الفريق أو اللاعب الفائز بالكأس ستتاح له فرصة الانتقال والتجربة في أندية كبيرة من الدرجة الأولى أو الثانية</p>
+        </div>
+        <div class="grid md:grid-cols-3 gap-6">
+            <div class="glass-card rounded-3xl p-8 text-center fade-in-up border-2 border-gold-200/50 relative overflow-hidden">
+                <div class="absolute top-0 left-0 w-full h-1 gold-gradient"></div>
+                <div class="w-20 h-20 mx-auto mb-4 rounded-2xl bg-gold-100 flex items-center justify-center text-4xl">🥇</div>
+                <h3 class="text-xl font-black text-gold-700 mb-2">البطل</h3>
+                <p class="text-slate-600 text-sm mb-4">كأس مِراس + ميداليات ذهبية</p>
+                <div class="p-3 bg-gold-50 rounded-xl">
+                    <p class="text-sm font-bold text-gold-700"><i class="fas fa-star ml-1"></i>تجربة احترافية في نادي درجة أولى</p>
+                </div>
+            </div>
+            <div class="glass-card rounded-3xl p-8 text-center fade-in-up" style="transition-delay:.1s">
+                <div class="w-20 h-20 mx-auto mb-4 rounded-2xl bg-slate-100 flex items-center justify-center text-4xl">🥈</div>
+                <h3 class="text-xl font-black text-slate-700 mb-2">الوصيف</h3>
+                <p class="text-slate-600 text-sm mb-4">ميداليات فضية + شهادات تقدير</p>
+                <div class="p-3 bg-slate-50 rounded-xl">
+                    <p class="text-sm font-bold text-slate-700"><i class="fas fa-star ml-1"></i>تجربة احترافية في نادي درجة ثانية</p>
+                </div>
+            </div>
+            <div class="glass-card rounded-3xl p-8 text-center fade-in-up" style="transition-delay:.2s">
+                <div class="w-20 h-20 mx-auto mb-4 rounded-2xl bg-amber-50 flex items-center justify-center text-4xl">🥉</div>
+                <h3 class="text-xl font-black text-amber-700 mb-2">الثالث</h3>
+                <p class="text-slate-600 text-sm mb-4">ميداليات برونزية + جوائز قيمة</p>
+                <div class="p-3 bg-amber-50 rounded-xl">
+                    <p class="text-sm font-bold text-amber-700"><i class="fas fa-star ml-1"></i>دعم تدريبي لمدة 6 أشهر</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Age Categories -->
+    <div class="bg-white py-16">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-12 fade-in-up">
+                <span class="inline-block px-4 py-1.5 rounded-full bg-saudi-50 text-saudi-700 text-sm font-semibold mb-4">فئات البطولة</span>
+                <h2 class="text-3xl font-black text-slate-900 mb-4">فئات الأعمار المخصصة</h2>
+                <p class="text-slate-500 max-w-2xl mx-auto">تنقسم البطولة إلى فئات عمرية مختلفة لضمان تنافس عادل ومثمر لجميع اللاعبين</p>
+            </div>
+            <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-5">
+                <div class="glass-card rounded-3xl p-6 text-center fade-in-up hover:shadow-xl transition-all">
+                    <div class="w-16 h-16 mx-auto mb-3 rounded-2xl bg-blue-50 flex items-center justify-center"><i class="fas fa-child text-2xl text-blue-600"></i></div>
+                    <h3 class="font-bold text-slate-900 mb-1">البراعم</h3>
+                    <div class="text-2xl font-black text-blue-600 mb-2">U-10</div>
+                    <p class="text-xs text-slate-500">مواليد 2016 فما فوق</p>
+                    <div class="mt-3 pt-3 border-t border-slate-100"><span class="text-xs text-slate-400">16 فريق</span></div>
+                </div>
+                <div class="glass-card rounded-3xl p-6 text-center fade-in-up hover:shadow-xl transition-all" style="transition-delay:.05s">
+                    <div class="w-16 h-16 mx-auto mb-3 rounded-2xl bg-saudi-50 flex items-center justify-center"><i class="fas fa-child text-2xl text-saudi-600"></i></div>
+                    <h3 class="font-bold text-slate-900 mb-1">الأشبال</h3>
+                    <div class="text-2xl font-black text-saudi-600 mb-2">U-12</div>
+                    <p class="text-xs text-slate-500">مواليد 2014 - 2015</p>
+                    <div class="mt-3 pt-3 border-t border-slate-100"><span class="text-xs text-slate-400">16 فريق</span></div>
+                </div>
+                <div class="glass-card rounded-3xl p-6 text-center fade-in-up hover:shadow-xl transition-all" style="transition-delay:.1s">
+                    <div class="w-16 h-16 mx-auto mb-3 rounded-2xl bg-gold-50 flex items-center justify-center"><i class="fas fa-user text-2xl text-gold-600"></i></div>
+                    <h3 class="font-bold text-slate-900 mb-1">الناشئون</h3>
+                    <div class="text-2xl font-black text-gold-600 mb-2">U-14</div>
+                    <p class="text-xs text-slate-500">مواليد 2012 - 2013</p>
+                    <div class="mt-3 pt-3 border-t border-slate-100"><span class="text-xs text-slate-400">16 فريق</span></div>
+                </div>
+                <div class="glass-card rounded-3xl p-6 text-center fade-in-up hover:shadow-xl transition-all" style="transition-delay:.15s">
+                    <div class="w-16 h-16 mx-auto mb-3 rounded-2xl bg-emerald-50 flex items-center justify-center"><i class="fas fa-user-tie text-2xl text-emerald-600"></i></div>
+                    <h3 class="font-bold text-slate-900 mb-1">الشباب</h3>
+                    <div class="text-2xl font-black text-emerald-600 mb-2">U-17</div>
+                    <p class="text-xs text-slate-500">مواليد 2009 - 2011</p>
+                    <div class="mt-3 pt-3 border-t border-slate-100"><span class="text-xs text-slate-400">16 فريق</span></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Terms & Conditions -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+        <div class="grid lg:grid-cols-2 gap-8">
+            <div class="fade-in-up">
+                <span class="inline-block px-4 py-1.5 rounded-full bg-slate-100 text-slate-700 text-sm font-semibold mb-4">الشروط والأحكام</span>
+                <h2 class="text-3xl font-black text-slate-900 mb-6">شروط المشاركة في كأس مِراس</h2>
+                <div class="space-y-4">
+                    <div class="flex items-start gap-3 p-4 bg-slate-50 rounded-2xl">
+                        <div class="w-8 h-8 rounded-full bg-saudi-100 flex items-center justify-center shrink-0 text-saudi-700 font-bold text-sm">1</div>
+                        <p class="text-slate-700 text-sm">يجب أن يكون اللاعب مسجلاً في نظام مِراس ولديه ملف رقمي موحد.</p>
+                    </div>
+                    <div class="flex items-start gap-3 p-4 bg-slate-50 rounded-2xl">
+                        <div class="w-8 h-8 rounded-full bg-saudi-100 flex items-center justify-center shrink-0 text-saudi-700 font-bold text-sm">2</div>
+                        <p class="text-slate-700 text-sm">الفريق يتكون من 11 لاعب أساسي + 7 احتياطيين كحد أقصى.</p>
+                    </div>
+                    <div class="flex items-start gap-3 p-4 bg-slate-50 rounded-2xl">
+                        <div class="w-8 h-8 rounded-full bg-saudi-100 flex items-center justify-center shrink-0 text-saudi-700 font-bold text-sm">3</div>
+                        <p class="text-slate-700 text-sm">يلتزم جميع اللاعبين بقواعد اللعب النظيف واحترام الحكم والخصم.</p>
+                    </div>
+                    <div class="flex items-start gap-3 p-4 bg-slate-50 rounded-2xl">
+                        <div class="w-8 h-8 rounded-full bg-saudi-100 flex items-center justify-center shrink-0 text-saudi-700 font-bold text-sm">4</div>
+                        <p class="text-slate-700 text-sm">يُشترط حضور اللاعب للتدريبات بنسبة 80% على الأقل خلال فترة البطولة.</p>
+                    </div>
+                    <div class="flex items-start gap-3 p-4 bg-slate-50 rounded-2xl">
+                        <div class="w-8 h-8 rounded-full bg-saudi-100 flex items-center justify-center shrink-0 text-saudi-700 font-bold text-sm">5</div>
+                        <p class="text-slate-700 text-sm">مؤشر مِراس للاعب يجب ألا يقل عن 60 نقطة للمشاركة في المباريات.</p>
+                    </div>
+                    <div class="flex items-start gap-3 p-4 bg-slate-50 rounded-2xl">
+                        <div class="w-8 h-8 rounded-full bg-saudi-100 flex items-center justify-center shrink-0 text-saudi-700 font-bold text-sm">6</div>
+                        <p class="text-slate-700 text-sm">رسوم التسجيل: 500 ريال للفريق الواحد (تشمل التأمين والتجهيزات).</p>
+                    </div>
+                </div>
+            </div>
+            <div class="fade-in-up" style="transition-delay:.1s">
+                <span class="inline-block px-4 py-1.5 rounded-full bg-gold-50 text-gold-700 text-sm font-semibold mb-4">الجدول الزمني</span>
+                <h2 class="text-3xl font-black text-slate-900 mb-6">مواعيد البطولة</h2>
+                <div class="space-y-4">
+                    <div class="flex items-center gap-4 p-5 bg-saudi-50 rounded-2xl border-r-4 border-saudi-600">
+                        <div class="text-center shrink-0"><div class="text-2xl font-black text-saudi-700">1</div><div class="text-xs text-slate-500">سبتمبر</div></div>
+                        <div><p class="font-bold text-slate-900">انطلاق التسجيل</p><p class="text-sm text-slate-500">فتح باب التسجيل للفرق المشاركة</p></div>
+                    </div>
+                    <div class="flex items-center gap-4 p-5 bg-slate-50 rounded-2xl border-r-4 border-slate-300">
+                        <div class="text-center shrink-0"><div class="text-2xl font-black text-slate-700">15</div><div class="text-xs text-slate-500">سبتمبر</div></div>
+                        <div><p class="font-bold text-slate-900">إغلاق التسجيل</p><p class="text-sm text-slate-500">آخر موعد لاستقبال طلبات المشاركة</p></div>
+                    </div>
+                    <div class="flex items-center gap-4 p-5 bg-gold-50 rounded-2xl border-r-4 border-gold-500">
+                        <div class="text-center shrink-0"><div class="text-2xl font-black text-gold-700">20</div><div class="text-xs text-slate-500">سبتمبر</div></div>
+                        <div><p class="font-bold text-slate-900">قرعة المجموعات</p><p class="text-sm text-slate-500">توزيع الفرق على المجموعات</p></div>
+                    </div>
+                    <div class="flex items-center gap-4 p-5 bg-emerald-50 rounded-2xl border-r-4 border-emerald-500">
+                        <div class="text-center shrink-0"><div class="text-2xl font-black text-emerald-700">1</div><div class="text-xs text-slate-500">أكتوبر</div></div>
+                        <div><p class="font-bold text-slate-900">بداية الدوري</p><p class="text-sm text-slate-500">انطلاق مباريات دور المجموعات</p></div>
+                    </div>
+                    <div class="flex items-center gap-4 p-5 bg-blue-50 rounded-2xl border-r-4 border-blue-500">
+                        <div class="text-center shrink-0"><div class="text-2xl font-black text-blue-700">15</div><div class="text-xs text-slate-500">نوفمبر</div></div>
+                        <div><p class="font-bold text-slate-900">الأدوار الإقصائية</p><p class="text-sm text-slate-500">دور الـ16، ربع النهائي، نصف النهائي</p></div>
+                    </div>
+                    <div class="flex items-center gap-4 p-5 bg-rose-50 rounded-2xl border-r-4 border-rose-500">
+                        <div class="text-center shrink-0"><div class="text-2xl font-black text-rose-700">15</div><div class="text-xs text-slate-500">ديسمبر</div></div>
+                        <div><p class="font-bold text-slate-900">النهائي الكبير</p><p class="text-sm text-slate-500">المباراة النهائية + حفل التتويج</p></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Teams & Matches -->
+    <div id="cup-schedule" class="bg-white py-16">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-12 fade-in-up">
+                <span class="inline-block px-4 py-1.5 rounded-full bg-saudi-50 text-saudi-700 text-sm font-semibold mb-4">المنافسة</span>
+                <h2 class="text-3xl font-black text-slate-900 mb-4">الفرق المشاركة والمباريات</h2>
+                <p class="text-slate-500 max-w-2xl mx-auto">64 فريق من مختلف المدن السعودية يتنافسون على لقب كأس مِراس 2026</p>
+            </div>
+
+            <!-- Groups -->
+            <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-4 mb-10">
+                <div class="glass-card rounded-2xl p-4 fade-in-up">
+                    <div class="flex items-center justify-between mb-3"><h4 class="font-bold text-slate-900">المجموعة أ</h4><span class="text-xs text-slate-400">الرياض</span></div>
+                    <div class="space-y-2">
+                        <div class="flex items-center gap-2 text-sm"><div class="w-6 h-6 rounded bg-saudi-600 flex items-center justify-center text-white text-[10px] font-bold">1</div><span class="text-slate-700">أكاديمية النصر</span></div>
+                        <div class="flex items-center gap-2 text-sm"><div class="w-6 h-6 rounded bg-blue-500 flex items-center justify-center text-white text-[10px] font-bold">2</div><span class="text-slate-700">مدرسة النور</span></div>
+                        <div class="flex items-center gap-2 text-sm"><div class="w-6 h-6 rounded bg-slate-300 flex items-center justify-center text-white text-[10px] font-bold">3</div><span class="text-slate-700">أكاديمية الهلال</span></div>
+                        <div class="flex items-center gap-2 text-sm"><div class="w-6 h-6 rounded bg-slate-300 flex items-center justify-center text-white text-[10px] font-bold">4</div><span class="text-slate-700">نادي الانصار</span></div>
+                    </div>
+                </div>
+                <div class="glass-card rounded-2xl p-4 fade-in-up" style="transition-delay:.05s">
+                    <div class="flex items-center justify-between mb-3"><h4 class="font-bold text-slate-900">المجموعة ب</h4><span class="text-xs text-slate-400">جدة</span></div>
+                    <div class="space-y-2">
+                        <div class="flex items-center gap-2 text-sm"><div class="w-6 h-6 rounded bg-saudi-600 flex items-center justify-center text-white text-[10px] font-bold">1</div><span class="text-slate-700">أكاديمية الاتحاد</span></div>
+                        <div class="flex items-center gap-2 text-sm"><div class="w-6 h-6 rounded bg-blue-500 flex items-center justify-center text-white text-[10px] font-bold">2</div><span class="text-slate-700">مدرسة الفيصلية</span></div>
+                        <div class="flex items-center gap-2 text-sm"><div class="w-6 h-6 rounded bg-slate-300 flex items-center justify-center text-white text-[10px] font-bold">3</div><span class="text-slate-700">نادي أبها</span></div>
+                        <div class="flex items-center gap-2 text-sm"><div class="w-6 h-6 rounded bg-slate-300 flex items-center justify-center text-white text-[10px] font-bold">4</div><span class="text-slate-700">أكاديمية جدة</span></div>
+                    </div>
+                </div>
+                <div class="glass-card rounded-2xl p-4 fade-in-up" style="transition-delay:.1s">
+                    <div class="flex items-center justify-between mb-3"><h4 class="font-bold text-slate-900">المجموعة ج</h4><span class="text-xs text-slate-400">الدمام</span></div>
+                    <div class="space-y-2">
+                        <div class="flex items-center gap-2 text-sm"><div class="w-6 h-6 rounded bg-saudi-600 flex items-center justify-center text-white text-[10px] font-bold">1</div><span class="text-slate-700">نادي الاتفاق</span></div>
+                        <div class="flex items-center gap-2 text-sm"><div class="w-6 h-6 rounded bg-blue-500 flex items-center justify-center text-white text-[10px] font-bold">2</div><span class="text-slate-700">مدرسة الدمام</span></div>
+                        <div class="flex items-center gap-2 text-sm"><div class="w-6 h-6 rounded bg-slate-300 flex items-center justify-center text-white text-[10px] font-bold">3</div><span class="text-slate-700">أكاديمية الخليج</span></div>
+                        <div class="flex items-center gap-2 text-sm"><div class="w-6 h-6 rounded bg-slate-300 flex items-center justify-center text-white text-[10px] font-bold">4</div><span class="text-slate-700">نادي القادسية</span></div>
+                    </div>
+                </div>
+                <div class="glass-card rounded-2xl p-4 fade-in-up" style="transition-delay:.15s">
+                    <div class="flex items-center justify-between mb-3"><h4 class="font-bold text-slate-900">المجموعة د</h4><span class="text-xs text-slate-400">مكة</span></div>
+                    <div class="space-y-2">
+                        <div class="flex items-center gap-2 text-sm"><div class="w-6 h-6 rounded bg-saudi-600 flex items-center justify-center text-white text-[10px] font-bold">1</div><span class="text-slate-700">نادي الوحدة</span></div>
+                        <div class="flex items-center gap-2 text-sm"><div class="w-6 h-6 rounded bg-blue-500 flex items-center justify-center text-white text-[10px] font-bold">2</div><span class="text-slate-700">مدرسة التحفيظ</span></div>
+                        <div class="flex items-center gap-2 text-sm"><div class="w-6 h-6 rounded bg-slate-300 flex items-center justify-center text-white text-[10px] font-bold">3</div><span class="text-slate-700">أكاديمية مكة</span></div>
+                        <div class="flex items-center gap-2 text-sm"><div class="w-6 h-6 rounded bg-slate-300 flex items-center justify-center text-white text-[10px] font-bold">4</div><span class="text-slate-700">نادي الأهلي</span></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Match Schedule -->
+            <div class="glass-card rounded-3xl p-6 fade-in-up">
+                <div class="flex items-center justify-between mb-6">
+                    <h3 class="text-lg font-black text-slate-900">جدول المباريات القادمة</h3>
+                    <div class="flex gap-2">
+                        <button class="px-3 py-1.5 rounded-full text-xs font-bold bg-saudi-600 text-white">الكل</button>
+                        <button class="px-3 py-1.5 rounded-full text-xs font-medium bg-slate-100 text-slate-600">المجموعة أ</button>
+                        <button class="px-3 py-1.5 rounded-full text-xs font-medium bg-slate-100 text-slate-600">المجموعة ب</button>
+                    </div>
+                </div>
+                <div class="space-y-3">
+                    <div class="match-row flex items-center justify-between p-4 bg-slate-50 rounded-2xl">
+                        <div class="flex items-center gap-4 flex-1">
+                            <div class="text-center"><div class="text-xs text-slate-400">السبت</div><div class="font-black text-slate-800">20 سبتمبر</div><div class="text-xs text-slate-400">16:00</div></div>
+                            <div class="h-8 w-px bg-slate-200"></div>
+                            <div class="flex items-center gap-4 flex-1 justify-center">
+                                <div class="text-center"><div class="w-10 h-10 rounded-xl bg-saudi-600 flex items-center justify-center text-white font-bold text-sm mx-auto mb-1">نص</div><span class="text-sm font-bold">أكاديمية النصر</span></div>
+                                <div class="px-4 py-2 bg-slate-200 rounded-xl font-black text-slate-700">VS</div>
+                                <div class="text-center"><div class="w-10 h-10 rounded-xl bg-blue-500 flex items-center justify-center text-white font-bold text-sm mx-auto mb-1">هل</div><span class="text-sm font-bold">أكاديمية الهلال</span></div>
+                            </div>
+                        </div>
+                        <span class="px-3 py-1 bg-amber-50 text-amber-700 text-xs rounded-full font-bold mr-4">U-14</span>
+                    </div>
+                    <div class="match-row flex items-center justify-between p-4 bg-slate-50 rounded-2xl">
+                        <div class="flex items-center gap-4 flex-1">
+                            <div class="text-center"><div class="text-xs text-slate-400">الأحد</div><div class="font-black text-slate-800">21 سبتمبر</div><div class="text-xs text-slate-400">18:30</div></div>
+                            <div class="h-8 w-px bg-slate-200"></div>
+                            <div class="flex items-center gap-4 flex-1 justify-center">
+                                <div class="text-center"><div class="w-10 h-10 rounded-xl bg-emerald-600 flex items-center justify-center text-white font-bold text-sm mx-auto mb-1">ات</div><span class="text-sm font-bold">نادي الاتفاق</span></div>
+                                <div class="px-4 py-2 bg-slate-200 rounded-xl font-black text-slate-700">VS</div>
+                                <div class="text-center"><div class="w-10 h-10 rounded-xl bg-cyan-600 flex items-center justify-center text-white font-bold text-sm mx-auto mb-1">دم</div><span class="text-sm font-bold">مدرسة الدمام</span></div>
+                            </div>
+                        </div>
+                        <span class="px-3 py-1 bg-saudi-50 text-saudi-700 text-xs rounded-full font-bold mr-4">U-17</span>
+                    </div>
+                    <div class="match-row flex items-center justify-between p-4 bg-slate-50 rounded-2xl">
+                        <div class="flex items-center gap-4 flex-1">
+                            <div class="text-center"><div class="text-xs text-slate-400">الإثنين</div><div class="font-black text-slate-800">22 سبتمبر</div><div class="text-xs text-slate-400">17:00</div></div>
+                            <div class="h-8 w-px bg-slate-200"></div>
+                            <div class="flex items-center gap-4 flex-1 justify-center">
+                                <div class="text-center"><div class="w-10 h-10 rounded-xl bg-yellow-600 flex items-center justify-center text-white font-bold text-sm mx-auto mb-1">ات</div><span class="text-sm font-bold">أكاديمية الاتحاد</span></div>
+                                <div class="px-4 py-2 bg-slate-200 rounded-xl font-black text-slate-700">VS</div>
+                                <div class="text-center"><div class="w-10 h-10 rounded-xl bg-amber-500 flex items-center justify-center text-white font-bold text-sm mx-auto mb-1">في</div><span class="text-sm font-bold">مدرسة الفيصلية</span></div>
+                            </div>
+                        </div>
+                        <span class="px-3 py-1 bg-blue-50 text-blue-700 text-xs rounded-full font-bold mr-4">U-12</span>
+                    </div>
+                    <div class="match-row flex items-center justify-between p-4 bg-slate-50 rounded-2xl">
+                        <div class="flex items-center gap-4 flex-1">
+                            <div class="text-center"><div class="text-xs text-slate-400">الثلاثاء</div><div class="font-black text-slate-800">23 سبتمبر</div><div class="text-xs text-slate-400">15:30</div></div>
+                            <div class="h-8 w-px bg-slate-200"></div>
+                            <div class="flex items-center gap-4 flex-1 justify-center">
+                                <div class="text-center"><div class="w-10 h-10 rounded-xl bg-purple-600 flex items-center justify-center text-white font-bold text-sm mx-auto mb-1">وح</div><span class="text-sm font-bold">نادي الوحدة</span></div>
+                                <div class="px-4 py-2 bg-slate-200 rounded-xl font-black text-slate-700">VS</div>
+                                <div class="text-center"><div class="w-10 h-10 rounded-xl bg-rose-500 flex items-center justify-center text-white font-bold text-sm mx-auto mb-1">تح</div><span class="text-sm font-bold">مدرسة التحفيظ</span></div>
+                            </div>
+                        </div>
+                        <span class="px-3 py-1 bg-emerald-50 text-emerald-700 text-xs rounded-full font-bold mr-4">U-10</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Registration CTA -->
+    <div id="cup-register" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
+        <div class="green-gradient rounded-3xl p-10 lg:p-16 text-center relative overflow-hidden fade-in-up">
+            <div class="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full -mr-20 -mt-20"></div>
+            <div class="absolute bottom-0 left-0 w-48 h-48 bg-white/5 rounded-full -ml-10 -mb-10"></div>
+            <div class="relative z-10">
+                <div class="w-20 h-20 mx-auto mb-6 rounded-3xl bg-white/20 flex items-center justify-center text-4xl">⚽</div>
+                <h2 class="text-3xl lg:text-4xl font-black text-white mb-4">سجّل فريقك في كأس مِراس 2026</h2>
+                <p class="text-slate-200 max-w-xl mx-auto mb-8">لا تفوت الفرصة! سجّل فريقك الآن وكن جزءاً من أكبر بطولة مواهب في المملكة. الفائز يحصل على فرصة احترافية حقيقية.</p>
+                <div class="flex flex-wrap justify-center gap-4">
+                    <button class="px-10 py-4 bg-gold-500 text-white rounded-full font-bold shadow-xl hover:shadow-2xl hover:scale-105 transition-all">التسجيل الآن</button>
+                    <button class="px-10 py-4 bg-white/10 text-white border border-white/20 rounded-full font-bold backdrop-blur-sm hover:bg-white/20 transition-all">تحميل الشروط PDF</button>
+                </div>
+                <p class="text-white/60 text-sm mt-6">آخر موعد للتسجيل: 15 سبتمبر 2026</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ========== NATIONAL MAP (IMPROVED) ========== -->
+<section id="screen-map" class="screen-section hidden pt-24 pb-10">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center mb-10 fade-in-up">
+            <span class="inline-block px-4 py-1.5 rounded-full bg-saudi-50 text-saudi-700 text-sm font-semibold mb-4">الخريطة الوطنية للمواهب</span>
+            <h1 class="text-3xl lg:text-4xl font-black text-slate-900 mb-3">اكتشف المواهب في كل مدينة</h1>
+            <p class="text-slate-500 max-w-2xl mx-auto">توزيع الرياضيين حسب المدن والرياضات مع عرض الطلاب الحائزين على الجوائز</p>
+        </div>
+
+        <!-- Sport Filter Pills -->
+        <div class="flex flex-wrap justify-center gap-3 mb-8 fade-in-up">
+            <button onclick="filterMap('all')" id="filter-all" class="sport-pill px-5 py-2.5 rounded-full text-sm font-bold bg-saudi-600 text-white shadow-lg shadow-saudi-600/20">الكل</button>
+            <button onclick="filterMap('football')" id="filter-football" class="sport-pill px-5 py-2.5 rounded-full text-sm font-medium bg-white border border-slate-200 text-slate-600 hover:border-saudi-300 hover:text-saudi-700"><i class="fas fa-futbol ml-1.5"></i>كرة القدم</button>
+            <button onclick="filterMap('basketball')" id="filter-basketball" class="sport-pill px-5 py-2.5 rounded-full text-sm font-medium bg-white border border-slate-200 text-slate-600 hover:border-orange-300 hover:text-orange-700"><i class="fas fa-basketball-ball ml-1.5"></i>كرة السلة</button>
+            <button onclick="filterMap('tennis')" id="filter-tennis" class="sport-pill px-5 py-2.5 rounded-full text-sm font-medium bg-white border border-slate-200 text-slate-600 hover:border-yellow-300 hover:text-yellow-700"><i class="fas fa-table-tennis ml-1.5"></i>التنس</button>
+            <button onclick="filterMap('martial')" id="filter-martial" class="sport-pill px-5 py-2.5 rounded-full text-sm font-medium bg-white border border-slate-200 text-slate-600 hover:border-red-300 hover:text-red-700"><i class="fas fa-fist-raised ml-1.5"></i>فنون قتالية</button>
+            <button onclick="filterMap('swimming')" id="filter-swimming" class="sport-pill px-5 py-2.5 rounded-full text-sm font-medium bg-white border border-slate-200 text-slate-600 hover:border-cyan-300 hover:text-cyan-700"><i class="fas fa-swimmer ml-1.5"></i>السباحة</button>
+        </div>
+
+        <div class="grid lg:grid-cols-3 gap-6">
+            <!-- Map Container -->
+            <div class="lg:col-span-2 glass-card rounded-3xl p-6 fade-in-up">
+                <div class="flex items-center justify-between mb-4">
+                    <h3 class="text-lg font-black text-slate-900">خريطة المملكة العربية السعودية</h3>
+                    <div class="flex items-center gap-2 text-xs text-slate-500">
+                        <span class="flex items-center gap-1"><span class="w-3 h-3 rounded-full bg-saudi-600"></span>أكثر من 5000</span>
+                        <span class="flex items-center gap-1"><span class="w-3 h-3 rounded-full bg-saudi-400"></span>1000-5000</span>
+                        <span class="flex items-center gap-1"><span class="w-3 h-3 rounded-full bg-saudi-200"></span>أقل من 1000</span>
+                    </div>
+                </div>
+                <div class="relative bg-slate-50 rounded-2xl overflow-hidden" style="min-height:500px;">
+                    <svg viewBox="0 0 900 700" class="w-full h-full" style="min-height:500px;" id="saudi-map">
+                        <!-- Region: تبوك -->
+                        <path class="map-region" d="M120,80 L280,60 L320,120 L300,200 L240,240 L160,220 L100,160 Z" data-city="tabuk" data-name="تبوك" onclick="selectCity('tabuk')"/>
+
+                        <!-- Region: الحدود الشمالية -->
+                        <path class="map-region" d="M320,60 L480,50 L520,110 L480,180 L400,190 L320,120 Z" data-city="north" data-name="الحدود الشمالية" onclick="selectCity('north')"/>
+
+                        <!-- Region: الجوف -->
+                        <path class="map-region" d="M280,200 L380,190 L420,250 L380,300 L300,310 L260,260 Z" data-city="jawf" data-name="الجوف" onclick="selectCity('jawf')"/>
+
+                        <!-- Region: حائل -->
+                        <path class="map-region" d="M380,190 L480,180 L520,240 L480,300 L420,310 L380,300 L420,250 Z" data-city="hail" data-name="حائل" onclick="selectCity('hail')"/>
+
+                        <!-- Region: القصيم -->
+                        <path class="map-region" d="M420,310 L520,300 L560,360 L520,420 L460,430 L400,400 L380,350 Z" data-city="qassim" data-name="القصيم" onclick="selectCity('qassim')"/>
+
+                        <!-- Region: المدينة المنورة -->
+                        <path class="map-region" d="M160,220 L240,240 L260,260 L300,310 L280,380 L220,420 L160,400 L120,320 L140,260 Z" data-city="madinah" data-name="المدينة المنورة" onclick="selectCity('madinah')"/>
+
+                        <!-- Region: مكة المكرمة -->
+                        <path class="map-region" d="M280,380 L380,350 L400,400 L420,480 L380,550 L320,580 L260,560 L240,500 L260,440 Z" data-city="makkah" data-name="مكة المكرمة" onclick="selectCity('makkah')"/>
+
+                        <!-- Region: الرياض -->
+                        <path class="map-region" d="M520,300 L620,280 L680,320 L700,400 L640,460 L560,480 L500,440 L460,430 L520,420 L560,360 Z" data-city="riyadh" data-name="الرياض" onclick="selectCity('riyadh')"/>
+
+                        <!-- Region: الشرقية -->
+                        <path class="map-region" d="M520,110 L680,100 L750,140 L780,220 L740,300 L680,320 L620,280 L560,360 L520,300 L480,300 L520,240 L480,180 Z" data-city="east" data-name="الشرقية" onclick="selectCity('east')"/>
+
+                        <!-- Region: الباحة -->
+                        <path class="map-region" d="M380,550 L420,480 L460,490 L480,540 L440,580 L400,570 Z" data-city="baha" data-name="الباحة" onclick="selectCity('baha')"/>
+
+                        <!-- Region: عسير -->
+                        <path class="map-region" d="M320,580 L380,550 L400,570 L440,580 L480,600 L460,650 L400,660 L340,640 Z" data-city="aseer" data-name="عسير" onclick="selectCity('aseer')"/>
+
+                        <!-- Region: جازان -->
+                        <path class="map-region" d="M340,640 L400,660 L420,690 L380,700 L340,680 Z" data-city="jazan" data-name="جازان" onclick="selectCity('jazan')"/>
+
+                        <!-- Region: نجران -->
+                        <path class="map-region" d="M480,600 L520,580 L560,620 L540,660 L500,670 L460,650 Z" data-city="najran" data-name="نجران" onclick="selectCity('najran')"/>
+
+                        <!-- City Labels -->
+                        <text x="200" y="140" class="city-label">تبوك</text>
+                        <text x="400" y="110" class="city-label">عرعر</text>
+                        <text x="340" y="260" class="city-label">سكاكا</text>
+                        <text x="450" y="250" class="city-label">حائل</text>
+                        <text x="480" y="370" class="city-label">بريدة</text>
+                        <text x="200" y="320" class="city-label">المدينة</text>
+                        <text x="340" y="480" class="city-label">مكة</text>
+                        <text x="600" y="380" class="city-label">الرياض</text>
+                        <text x="650" y="200" class="city-label">الدمام</text>
+                        <text x="420" y="530" class="city-label">الباحة</text>
+                        <text x="400" y="620" class="city-label">أبها</text>
+                        <text x="370" y="680" class="city-label">جازان</text>
+                        <text x="510" y="630" class="city-label">نجران</text>
+
+                        <!-- City Dots -->
+                        <circle class="map-dot pulse-dot" cx="200" cy="140" r="6" fill="#006C35" data-city="tabuk"/>
+                        <circle class="map-dot" cx="400" cy="110" r="5" fill="#006C35" data-city="arar"/>
+                        <circle class="map-dot" cx="340" cy="260" r="5" fill="#006C35" data-city="jawf"/>
+                        <circle class="map-dot" cx="450" cy="250" r="5" fill="#006C35" data-city="hail"/>
+                        <circle class="map-dot" cx="480" cy="370" r="5" fill="#006C35" data-city="qassim"/>
+                        <circle class="map-dot" cx="200" cy="320" r="6" fill="#006C35" data-city="madinah"/>
+                        <circle class="map-dot" cx="340" cy="480" r="6" fill="#006C35" data-city="makkah"/>
+                        <circle class="map-dot pulse-dot" cx="600" cy="380" r="7" fill="#006C35" data-city="riyadh"/>
+                        <circle class="map-dot pulse-dot" cx="650" cy="200" r="6" fill="#006C35" data-city="dammam"/>
+                        <circle class="map-dot" cx="420" cy="530" r="4" fill="#006C35" data-city="baha"/>
+                        <circle class="map-dot" cx="400" cy="620" r="5" fill="#006C35" data-city="abha"/>
+                        <circle class="map-dot" cx="370" cy="680" r="4" fill="#006C35" data-city="jazan"/>
+                        <circle class="map-dot" cx="510" cy="630" r="4" fill="#006C35" data-city="najran"/>
+
+                        <!-- Additional Cities -->
+                        <circle class="map-dot" cx="280" cy="440" r="4" fill="#64748b" data-city="jeddah"/>
+                        <text x="280" y="430" class="city-label" style="font-size:10px;fill:#64748b">جدة</text>
+
+                        <circle class="map-dot" cx="720" cy="280" r="4" fill="#64748b" data-city="khobar"/>
+                        <text x="720" y="270" class="city-label" style="font-size:10px;fill:#64748b">الخبر</text>
+
+                        <circle class="map-dot" cx="580" cy="420" r="4" fill="#64748b" data-city="kharj"/>
+                        <text x="580" y="410" class="city-label" style="font-size:10px;fill:#64748b">الخرج</text>
+
+                        <circle class="map-dot" cx="160" cy="180" r="3" fill="#64748b" data-city="neom"/>
+                        <text x="160" y="170" class="city-label" style="font-size:9px;fill:#64748b">نيوم</text>
+                    </svg>
+                </div>
+
+                <!-- Region Info Bar -->
+                <div class="mt-4 grid grid-cols-2 md:grid-cols-4 gap-3" id="region-stats">
+                    <div class="p-3 bg-saudi-50 rounded-xl text-center">
+                        <div class="text-lg font-black text-saudi-700">18,420</div>
+                        <div class="text-xs text-slate-500">رياضي</div>
+                    </div>
+                    <div class="p-3 bg-blue-50 rounded-xl text-center">
+                        <div class="text-lg font-black text-blue-700">45</div>
+                        <div class="text-xs text-slate-500">أكاديمية</div>
+                    </div>
+                    <div class="p-3 bg-gold-50 rounded-xl text-center">
+                        <div class="text-lg font-black text-gold-700">128</div>
+                        <div class="text-xs text-slate-500">مدرسة</div>
+                    </div>
+                    <div class="p-3 bg-emerald-50 rounded-xl text-center">
+                        <div class="text-lg font-black text-emerald-700">2,340</div>
+                        <div class="text-xs text-slate-500">موهبة</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Side Panel -->
+            <div class="space-y-6">
+                <!-- City Stats -->
+                <div class="glass-card rounded-3xl p-6 fade-in-up" style="transition-delay:.1s">
+                    <h3 class="text-lg font-black text-slate-900 mb-4">الرياض <span class="text-sm font-normal text-slate-500">- أكثر المدن نشاطاً</span></h3>
+                    <div class="space-y-4">
+                        <div class="flex items-center justify-between p-3 bg-saudi-50 rounded-xl"><div class="flex items-center gap-3"><i class="fas fa-futbol text-saudi-600"></i><span class="text-sm font-medium text-slate-700">كرة القدم</span></div><span class="text-sm font-black text-saudi-700">8,420</span></div>
+                        <div class="flex items-center justify-between p-3 bg-orange-50 rounded-xl"><div class="flex items-center gap-3"><i class="fas fa-basketball-ball text-orange-600"></i><span class="text-sm font-medium text-slate-700">كرة السلة</span></div><span class="text-sm font-black text-orange-700">3,210</span></div>
+                        <div class="flex items-center justify-between p-3 bg-yellow-50 rounded-xl"><div class="flex items-center gap-3"><i class="fas fa-table-tennis text-yellow-600"></i><span class="text-sm font-medium text-slate-700">التنس</span></div><span class="text-sm font-black text-yellow-700">1,450</span></div>
+                        <div class="flex items-center justify-between p-3 bg-red-50 rounded-xl"><div class="flex items-center gap-3"><i class="fas fa-fist-raised text-red-600"></i><span class="text-sm font-medium text-slate-700">فنون قتالية</span></div><span class="text-sm font-black text-red-700">2,180</span></div>
+                        <div class="flex items-center justify-between p-3 bg-cyan-50 rounded-xl"><div class="flex items-center gap-3"><i class="fas fa-swimmer text-cyan-600"></i><span class="text-sm font-medium text-slate-700">السباحة</span></div><span class="text-sm font-black text-cyan-700">1,890</span></div>
+                    </div>
+                </div>
+
+                <!-- Top Athletes -->
+                <div class="glass-card rounded-3xl p-6 fade-in-up" style="transition-delay:.15s">
+                    <h3 class="text-lg font-black text-slate-900 mb-4">الطلاب الحائزون على الجوائز 🏆</h3>
+                    <div class="space-y-3">
+                        <div class="flex items-center gap-3 p-3 bg-gold-50 rounded-xl border border-gold-100">
+                            <div class="w-10 h-10 rounded-xl bg-saudi-600 flex items-center justify-center text-white font-bold text-sm">فد</div>
+                            <div class="flex-1"><p class="text-sm font-bold text-slate-800">فيصل الدوسري</p><p class="text-xs text-slate-500">حارس مرمى • كرة القدم</p></div>
+                            <span class="px-2 py-1 bg-gold-100 text-gold-700 text-xs rounded-lg font-bold">🥇 ذهبية</span>
+                        </div>
+                        <div class="flex items-center gap-3 p-3 bg-slate-50 rounded-xl">
+                            <div class="w-10 h-10 rounded-xl bg-amber-500 flex items-center justify-center text-white font-bold text-sm">عس</div>
+                            <div class="flex-1"><p class="text-sm font-bold text-slate-800">عمر السهلي</p><p class="text-xs text-slate-500">مهاجم • كرة القدم</p></div>
+                            <span class="px-2 py-1 bg-slate-200 text-slate-600 text-xs rounded-lg font-bold">🥈 فضية</span>
+                        </div>
+                        <div class="flex items-center gap-3 p-3 bg-orange-50 rounded-xl">
+                            <div class="w-10 h-10 rounded-xl bg-blue-500 flex items-center justify-center text-white font-bold text-sm">خع</div>
+                            <div class="flex-1"><p class="text-sm font-bold text-slate-800">خالد العمري</p><p class="text-xs text-slate-500">جناح • كرة السلة</p></div>
+                            <span class="px-2 py-1 bg-orange-100 text-orange-700 text-xs rounded-lg font-bold">🥉 برونزية</span>
+                        </div>
+                        <div class="flex items-center gap-3 p-3 bg-cyan-50 rounded-xl">
+                            <div class="w-10 h-10 rounded-xl bg-cyan-500 flex items-center justify-center text-white font-bold text-sm">نق</div>
+                            <div class="flex-1"><p class="text-sm font-bold text-slate-800">ناصر القحطاني</p><p class="text-xs text-slate-500">سباح • السباحة</p></div>
+                            <span class="px-2 py-1 bg-cyan-100 text-cyan-700 text-xs rounded-lg font-bold">🥇 ذهبية</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Age Distribution Chart -->
+                <div class="glass-card rounded-3xl p-6 fade-in-up" style="transition-delay:.2s">
+                    <h3 class="text-sm font-bold text-slate-500 mb-3">التوزيع العمري</h3>
+                    <div class="h-40"><canvas id="ageChart"></canvas></div>
+                </div>
+
+                <!-- All Regions List -->
+                <div class="glass-card rounded-3xl p-6 fade-in-up" style="transition-delay:.25s">
+                    <h3 class="text-sm font-bold text-slate-900 mb-3">جميع المناطق</h3>
+                    <div class="space-y-2 max-h-48 overflow-y-auto">
+                        <div class="flex items-center justify-between p-2 bg-slate-50 rounded-lg cursor-pointer hover:bg-saudi-50 transition-all" onclick="selectCity('riyadh')">
+                            <span class="text-sm text-slate-700">الرياض</span>
+                            <span class="text-xs font-bold text-saudi-700">18,420</span>
+                        </div>
+                        <div class="flex items-center justify-between p-2 bg-slate-50 rounded-lg cursor-pointer hover:bg-saudi-50 transition-all" onclick="selectCity('makkah')">
+                            <span class="text-sm text-slate-700">مكة المكرمة</span>
+                            <span class="text-xs font-bold text-saudi-700">12,850</span>
+                        </div>
+                        <div class="flex items-center justify-between p-2 bg-slate-50 rounded-lg cursor-pointer hover:bg-saudi-50 transition-all" onclick="selectCity('east')">
+                            <span class="text-sm text-slate-700">الشرقية</span>
+                            <span class="text-xs font-bold text-saudi-700">10,230</span>
+                        </div>
+                        <div class="flex items-center justify-between p-2 bg-slate-50 rounded-lg cursor-pointer hover:bg-saudi-50 transition-all" onclick="selectCity('madinah')">
+                            <span class="text-sm text-slate-700">المدينة المنورة</span>
+                            <span class="text-xs font-bold text-saudi-700">6,740</span>
+                        </div>
+                        <div class="flex items-center justify-between p-2 bg-slate-50 rounded-lg cursor-pointer hover:bg-saudi-50 transition-all" onclick="selectCity('aseer')">
+                            <span class="text-sm text-slate-700">عسير</span>
+                            <span class="text-xs font-bold text-saudi-700">4,120</span>
+                        </div>
+                        <div class="flex items-center justify-between p-2 bg-slate-50 rounded-lg cursor-pointer hover:bg-saudi-50 transition-all" onclick="selectCity('qassim')">
+                            <span class="text-sm text-slate-700">القصيم</span>
+                            <span class="text-xs font-bold text-saudi-700">3,890</span>
+                        </div>
+                        <div class="flex items-center justify-between p-2 bg-slate-50 rounded-lg cursor-pointer hover:bg-saudi-50 transition-all" onclick="selectCity('tabuk')">
+                            <span class="text-sm text-slate-700">تبوك</span>
+                            <span class="text-xs font-bold text-saudi-700">2,450</span>
+                        </div>
+                        <div class="flex items-center justify-between p-2 bg-slate-50 rounded-lg cursor-pointer hover:bg-saudi-50 transition-all" onclick="selectCity('hail')">
+                            <span class="text-sm text-slate-700">حائل</span>
+                            <span class="text-xs font-bold text-saudi-700">1,980</span>
+                        </div>
+                        <div class="flex items-center justify-between p-2 bg-slate-50 rounded-lg cursor-pointer hover:bg-saudi-50 transition-all" onclick="selectCity('jazan')">
+                            <span class="text-sm text-slate-700">جازان</span>
+                            <span class="text-xs font-bold text-saudi-700">1,650</span>
+                        </div>
+                        <div class="flex items-center justify-between p-2 bg-slate-50 rounded-lg cursor-pointer hover:bg-saudi-50 transition-all" onclick="selectCity('najran')">
+                            <span class="text-sm text-slate-700">نجران</span>
+                            <span class="text-xs font-bold text-saudi-700">1,320</span>
+                        </div>
+                        <div class="flex items-center justify-between p-2 bg-slate-50 rounded-lg cursor-pointer hover:bg-saudi-50 transition-all" onclick="selectCity('baha')">
+                            <span class="text-sm text-slate-700">الباحة</span>
+                            <span class="text-xs font-bold text-saudi-700">980</span>
+                        </div>
+                        <div class="flex items-center justify-between p-2 bg-slate-50 rounded-lg cursor-pointer hover:bg-saudi-50 transition-all" onclick="selectCity('jawf')">
+                            <span class="text-sm text-slate-700">الجوف</span>
+                            <span class="text-xs font-bold text-saudi-700">890</span>
+                        </div>
+                        <div class="flex items-center justify-between p-2 bg-slate-50 rounded-lg cursor-pointer hover:bg-saudi-50 transition-all" onclick="selectCity('north')">
+                            <span class="text-sm text-slate-700">الحدود الشمالية</span>
+                            <span class="text-xs font-bold text-saudi-700">650</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ========== LOGIN SCREEN ========== -->
+<section id="screen-login" class="screen-section hidden min-h-screen flex items-center justify-center bg-gradient-to-br from-saudi-900 via-saudi-800 to-saudi-700 p-4">
+    <div class="absolute inset-0 opacity-10" style="background-image:url('data:image/svg+xml,%3Csvg width="60" height="60" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg"%3E%3Cg fill="none" fill-rule="evenodd"%3E%3Cg fill="%23ffffff" fill-opacity="1"%3E%3Cpath d="M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z"/%3E%3C/g%3E%3C/g%3E%3C/svg%3E')"></div>
+    <div class="w-full max-w-lg">
+        <div class="text-center mb-8">
+            <button onclick="showScreen('landing')" class="text-white/60 hover:text-white mb-4 transition-all"><i class="fas fa-arrow-right ml-2"></i>العودة للرئيسية</button>
+            <div class="w-16 h-16 mx-auto rounded-2xl green-gradient flex items-center justify-center text-white font-bold text-2xl shadow-lg shadow-saudi-600/20 mb-4">م</div>
+            <h1 class="text-3xl font-black text-white mb-2">تسجيل الدخول</h1>
+            <p class="text-slate-300">أدخل بيانات حسابك للوصول إلى لوحة التحكم</p>
+        </div>
+
+        <div class="glass rounded-3xl p-8 shadow-2xl">
+            <div id="login-type-display" class="text-center mb-6 p-4 bg-saudi-50 rounded-2xl hidden">
+                <div class="w-12 h-12 mx-auto mb-2 rounded-xl bg-saudi-100 flex items-center justify-center"><i class="fas fa-user text-xl text-saudi-600" id="login-type-icon"></i></div>
+                <p class="text-sm font-bold text-saudi-700" id="login-type-text">حساب مدرب</p>
+            </div>
+
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-sm font-bold text-slate-700 mb-2">اسم المستخدم / البريد الإلكتروني</label>
+                    <input type="text" id="login-user" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-saudi-500 focus:ring-2 focus:ring-saudi-200 outline-none transition-all text-right" placeholder="أدخل اسم المستخدم">
+                </div>
+                <div>
+                    <label class="block text-sm font-bold text-slate-700 mb-2">كلمة المرور</label>
+                    <input type="password" id="login-pass" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:border-saudi-500 focus:ring-2 focus:ring-saudi-200 outline-none transition-all text-right" placeholder="••••••••">
+                </div>
+                <button onclick="performLogin()" class="w-full py-3.5 green-gradient text-white rounded-xl font-bold shadow-lg shadow-saudi-600/20 hover:shadow-xl transition-all">تسجيل الدخول</button>
+            </div>
+
+            <div class="text-center mt-6 pt-6 border-t border-slate-100">
+                <button onclick="guestLogin()" class="text-slate-500 hover:text-saudi-700 font-medium transition-all"><i class="fas fa-user-clock ml-2"></i>تصفح كزائر</button>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ========== SCHOOL DASHBOARD ========== -->
+<section id="screen-school" class="screen-section hidden pt-24 pb-10">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 mb-8 fade-in-up">
+            <div><h1 class="text-3xl font-black text-slate-900">لوحة تحكم المدرسة</h1><p class="text-slate-500 mt-1">مدرسة النور الابتدائية - الرياض</p></div>
+            <div class="flex gap-3">
+                <button class="px-4 py-2.5 bg-white border border-slate-200 rounded-full text-sm font-semibold text-slate-600 hover:border-saudi-300 hover:text-saudi-700 transition-all shadow-sm"><i class="fas fa-bell ml-2"></i>إشعارات <span class="bg-rose-500 text-white text-xs px-1.5 py-0.5 rounded-full mr-1">3</span></button>
+                <button class="px-4 py-2.5 green-gradient text-white rounded-full text-sm font-semibold shadow-lg shadow-saudi-600/20 hover:shadow-xl transition-all"><i class="fas fa-plus ml-2"></i>إضافة طالب</button>
+            </div>
+        </div>
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+            <div class="glass-card rounded-3xl p-5 fade-in-up"><div class="flex justify-between items-start mb-3"><div class="w-12 h-12 rounded-2xl bg-blue-50 flex items-center justify-center"><i class="fas fa-users text-xl text-blue-600"></i></div></div><div class="text-3xl font-black text-slate-900">342</div><div class="text-sm text-slate-500">إجمالي الطلاب</div></div>
+            <div class="glass-card rounded-3xl p-5 fade-in-up" style="transition-delay:.05s"><div class="flex justify-between items-start mb-3"><div class="w-12 h-12 rounded-2xl bg-saudi-50 flex items-center justify-center"><i class="fas fa-running text-xl text-saudi-600"></i></div></div><div class="text-3xl font-black text-slate-900">186</div><div class="text-sm text-slate-500">رياضي مسجل</div></div>
+            <div class="glass-card rounded-3xl p-5 fade-in-up" style="transition-delay:.1s"><div class="flex justify-between items-start mb-3"><div class="w-12 h-12 rounded-2xl bg-gold-50 flex items-center justify-center"><i class="fas fa-star text-xl text-gold-600"></i></div></div><div class="text-3xl font-black text-slate-900">24</div><div class="text-sm text-slate-500">موهبة مكتشفة</div></div>
+            <div class="glass-card rounded-3xl p-5 fade-in-up" style="transition-delay:.15s"><div class="flex justify-between items-start mb-3"><div class="w-12 h-12 rounded-2xl bg-rose-50 flex items-center justify-center"><i class="fas fa-trophy text-xl text-rose-600"></i></div></div><div class="text-3xl font-black text-slate-900">12</div><div class="text-sm text-slate-500">جائزة</div></div>
+        </div>
+        <div class="glass-card rounded-3xl p-6 mb-8 border-r-4 border-amber-400 fade-in-up">
+            <div class="flex items-center gap-2 mb-5"><div class="w-10 h-10 rounded-xl bg-amber-50 flex items-center justify-center"><i class="fas fa-bell text-amber-600 text-lg"></i></div><h2 class="text-lg font-black text-slate-900">الإشعارات الذكية</h2></div>
+            <div class="space-y-3">
+                <div class="flex items-start gap-4 p-4 bg-amber-50/50 rounded-2xl border border-amber-100"><div class="w-12 h-12 rounded-xl bg-amber-100 flex items-center justify-center shrink-0"><i class="fas fa-star text-amber-600"></i></div><div class="flex-1"><p class="text-slate-800 font-bold text-sm">إنجاز: أحمد الخالد حصل على لقب هداف البطولة</p><p class="text-sm text-slate-500 mt-1">بطولة المدارس 2025 - 12 هدف</p></div><span class="text-xs text-slate-400">منذ ساعة</span></div>
+                <div class="flex items-start gap-4 p-4 bg-rose-50/50 rounded-2xl border border-rose-100"><div class="w-12 h-12 rounded-xl bg-rose-100 flex items-center justify-center shrink-0"><i class="fas fa-exclamation-triangle text-rose-600"></i></div><div class="flex-1"><p class="text-slate-800 font-bold text-sm">تنبيه صحي: سعد المنصور يحتاج فحص طبي</p><p class="text-sm text-slate-500 mt-1">HRV منخفض بنسبة 20%</p></div><span class="text-xs text-slate-400">منذ 3 ساعات</span></div>
+                <div class="flex items-start gap-4 p-4 bg-blue-50/50 rounded-2xl border border-blue-100"><div class="w-12 h-12 rounded-xl bg-blue-100 flex items-center justify-center shrink-0"><i class="fas fa-user-plus text-blue-600"></i></div><div class="flex-1"><p class="text-slate-800 font-bold text-sm">تسجيل جديد: انضمام 3 طلاب جدد للنظام</p><p class="text-sm text-slate-500 mt-1">كرة القدم - الصف الثالث متوسط</p></div><span class="text-xs text-slate-400">اليوم</span></div>
+            </div>
+        </div>
+        <div class="grid lg:grid-cols-3 gap-6 mb-8">
+            <div class="glass-card rounded-3xl p-6 fade-in-up"><h3 class="text-lg font-black text-slate-900 mb-4">توزيع الرياضات</h3><div class="h-56"><canvas id="schoolSportChart"></canvas></div></div>
+            <div class="lg:col-span-2 glass-card rounded-3xl p-6 fade-in-up" style="transition-delay:.1s">
+                <div class="flex items-center justify-between mb-6"><h3 class="text-lg font-black text-slate-900">الطلاب الرياضيون</h3><div class="flex gap-2"><input type="text" placeholder="بحث..." class="px-4 py-2 rounded-xl border border-slate-200 text-sm outline-none focus:border-saudi-500 w-48"><button class="px-4 py-2 bg-saudi-50 text-saudi-700 rounded-xl text-sm font-semibold"><i class="fas fa-filter ml-1"></i>فلتر</button></div></div>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-right">
+                        <thead><tr class="text-xs text-slate-500 border-b border-slate-100"><th class="pb-3 font-medium">الطالب</th><th class="pb-3 font-medium">الرياضة</th><th class="pb-3 font-medium">المركز</th><th class="pb-3 font-medium">العمر</th><th class="pb-3 font-medium">الوزن</th><th class="pb-3 font-medium">الحالة الصحية</th><th class="pb-3 font-medium">مؤهل</th><th class="pb-3 font-medium">مؤشر مِراس</th></tr></thead>
+                        <tbody class="text-sm">
+                            <tr class="border-b border-slate-50 hover:bg-slate-50 transition-all"><td class="py-3"><div class="flex items-center gap-2"><div class="w-8 h-8 rounded-lg bg-saudi-600 flex items-center justify-center text-white text-xs font-bold">أخ</div><span class="font-bold">أحمد الخالد</span></div></td><td class="py-3"><span class="text-saudi-600"><i class="fas fa-futbol ml-1"></i>كرة القدم</span></td><td class="py-3 text-slate-600">وسط مهاجم</td><td class="py-3 text-slate-600">16 سنة</td><td class="py-3 text-slate-600">68 كجم</td><td class="py-3"><span class="px-2 py-1 bg-rose-50 text-rose-600 text-xs rounded-lg">إجهاد / نوم منخفض</span></td><td class="py-3"><span class="px-2 py-1 bg-rose-100 text-rose-700 text-xs rounded-lg font-bold">لا</span></td><td class="py-3"><span class="font-black text-rose-600">65</span></td></tr>
+                            <tr class="border-b border-slate-50 hover:bg-slate-50 transition-all"><td class="py-3"><div class="flex items-center gap-2"><div class="w-8 h-8 rounded-lg bg-amber-500 flex items-center justify-center text-white text-xs font-bold">سم</div><span class="font-bold">سعد المنصور</span></div></td><td class="py-3"><span class="text-saudi-600"><i class="fas fa-futbol ml-1"></i>كرة القدم</span></td><td class="py-3 text-slate-600">مدافع</td><td class="py-3 text-slate-600">15 سنة</td><td class="py-3 text-slate-600">70 كجم</td><td class="py-3"><span class="px-2 py-1 bg-amber-50 text-amber-600 text-xs rounded-lg">HRV منخفض</span></td><td class="py-3"><span class="px-2 py-1 bg-amber-100 text-amber-700 text-xs rounded-lg font-bold">متوسط</span></td><td class="py-3"><span class="font-black text-amber-600">75</span></td></tr>
+                            <tr class="border-b border-slate-50 hover:bg-slate-50 transition-all"><td class="py-3"><div class="flex items-center gap-2"><div class="w-8 h-8 rounded-lg bg-emerald-500 flex items-center justify-center text-white text-xs font-bold">فد</div><span class="font-bold">فيصل الدوسري</span></div></td><td class="py-3"><span class="text-saudi-600"><i class="fas fa-futbol ml-1"></i>كرة القدم</span></td><td class="py-3 text-slate-600">حارس مرمى</td><td class="py-3 text-slate-600">17 سنة</td><td class="py-3 text-slate-600">72 كجم</td><td class="py-3"><span class="px-2 py-1 bg-emerald-50 text-emerald-600 text-xs rounded-lg">ممتاز</span></td><td class="py-3"><span class="px-2 py-1 bg-emerald-100 text-emerald-700 text-xs rounded-lg font-bold">نعم</span></td><td class="py-3"><span class="font-black text-emerald-600">92</span></td></tr>
+                            <tr class="border-b border-slate-50 hover:bg-slate-50 transition-all"><td class="py-3"><div class="flex items-center gap-2"><div class="w-8 h-8 rounded-lg bg-amber-500 flex items-center justify-center text-white text-xs font-bold">عس</div><span class="font-bold">عمر السهلي</span></div></td><td class="py-3"><span class="text-saudi-600"><i class="fas fa-futbol ml-1"></i>كرة القدم</span></td><td class="py-3 text-slate-600">مهاجم</td><td class="py-3 text-slate-600">14 سنة</td><td class="py-3 text-slate-600">65 كجم</td><td class="py-3"><span class="px-2 py-1 bg-emerald-50 text-emerald-600 text-xs rounded-lg">جيد</span></td><td class="py-3"><span class="px-2 py-1 bg-emerald-100 text-emerald-700 text-xs rounded-lg font-bold">نعم</span></td><td class="py-3"><span class="font-black text-emerald-600">85</span></td></tr>
+                            <tr class="border-b border-slate-50 hover:bg-slate-50 transition-all"><td class="py-3"><div class="flex items-center gap-2"><div class="w-8 h-8 rounded-lg bg-blue-500 flex items-center justify-center text-white text-xs font-bold">خع</div><span class="font-bold">خالد العمري</span></div></td><td class="py-3"><span class="text-saudi-600"><i class="fas fa-futbol ml-1"></i>كرة القدم</span></td><td class="py-3 text-slate-600">وسط</td><td class="py-3 text-slate-600">16 سنة</td><td class="py-3 text-slate-600">69 كجم</td><td class="py-3"><span class="px-2 py-1 bg-blue-50 text-blue-600 text-xs rounded-lg">تراجع دراسي</span></td><td class="py-3"><span class="px-2 py-1 bg-rose-100 text-rose-700 text-xs rounded-lg font-bold">لا</span></td><td class="py-3"><span class="font-black text-blue-600">72</span></td></tr>
+                            <tr class="border-b border-slate-50 hover:bg-slate-50 transition-all"><td class="py-3"><div class="flex items-center gap-2"><div class="w-8 h-8 rounded-lg bg-orange-500 flex items-center justify-center text-white text-xs font-bold">نق</div><span class="font-bold">ناصر القحطاني</span></div></td><td class="py-3"><span class="text-orange-600"><i class="fas fa-basketball-ball ml-1"></i>كرة السلة</span></td><td class="py-3 text-slate-600">جناح أيمن</td><td class="py-3 text-slate-600">16 سنة</td><td class="py-3 text-slate-600">75 كجم</td><td class="py-3"><span class="px-2 py-1 bg-emerald-50 text-emerald-600 text-xs rounded-lg">جيد</span></td><td class="py-3"><span class="px-2 py-1 bg-emerald-100 text-emerald-700 text-xs rounded-lg font-bold">نعم</span></td><td class="py-3"><span class="font-black text-blue-600">80</span></td></tr>
+                            <tr class="border-b border-slate-50 hover:bg-slate-50 transition-all"><td class="py-3"><div class="flex items-center gap-2"><div class="w-8 h-8 rounded-lg bg-orange-600 flex items-center justify-center text-white text-xs font-bold">عش</div><span class="font-bold">عبدالله الشمري</span></div></td><td class="py-3"><span class="text-orange-600"><i class="fas fa-basketball-ball ml-1"></i>كرة السلة</span></td><td class="py-3 text-slate-600">مدافع</td><td class="py-3 text-slate-600">15 سنة</td><td class="py-3 text-slate-600">78 كجم</td><td class="py-3"><span class="px-2 py-1 bg-amber-50 text-amber-600 text-xs rounded-lg">متوسط</span></td><td class="py-3"><span class="px-2 py-1 bg-amber-100 text-amber-700 text-xs rounded-lg font-bold">متوسط</span></td><td class="py-3"><span class="font-black text-amber-600">70</span></td></tr>
+                            <tr class="border-b border-slate-50 hover:bg-slate-50 transition-all"><td class="py-3"><div class="flex items-center gap-2"><div class="w-8 h-8 rounded-lg bg-yellow-500 flex items-center justify-center text-white text-xs font-bold">يح</div><span class="font-bold">ياسر الحربي</span></div></td><td class="py-3"><span class="text-yellow-600"><i class="fas fa-table-tennis ml-1"></i>التنس</span></td><td class="py-3 text-slate-600">لاعب فردي</td><td class="py-3 text-slate-600">14 سنة</td><td class="py-3 text-slate-600">60 كجم</td><td class="py-3"><span class="px-2 py-1 bg-emerald-50 text-emerald-600 text-xs rounded-lg">جيد</span></td><td class="py-3"><span class="px-2 py-1 bg-emerald-100 text-emerald-700 text-xs rounded-lg font-bold">نعم</span></td><td class="py-3"><span class="font-black text-emerald-600">83</span></td></tr>
+                            <tr class="border-b border-slate-50 hover:bg-slate-50 transition-all"><td class="py-3"><div class="flex items-center gap-2"><div class="w-8 h-8 rounded-lg bg-red-500 flex items-center justify-center text-white text-xs font-bold">سف</div><span class="font-bold">سلطان الفيصل</span></div></td><td class="py-3"><span class="text-red-600"><i class="fas fa-fist-raised ml-1"></i>فنون قتالية</span></td><td class="py-3 text-slate-600">-</td><td class="py-3 text-slate-600">17 سنة</td><td class="py-3 text-slate-600">80 كجم</td><td class="py-3"><span class="px-2 py-1 bg-amber-50 text-amber-600 text-xs rounded-lg">متوسط</span></td><td class="py-3"><span class="px-2 py-1 bg-amber-100 text-amber-700 text-xs rounded-lg font-bold">متوسط</span></td><td class="py-3"><span class="font-black text-amber-600">74</span></td></tr>
+                            <tr class="hover:bg-slate-50 transition-all"><td class="py-3"><div class="flex items-center gap-2"><div class="w-8 h-8 rounded-lg bg-cyan-500 flex items-center justify-center text-white text-xs font-bold">مع</div><span class="font-bold">محمد العتيبي</span></div></td><td class="py-3"><span class="text-cyan-600"><i class="fas fa-swimmer ml-1"></i>السباحة</span></td><td class="py-3 text-slate-600">سباح حر</td><td class="py-3 text-slate-600">15 سنة</td><td class="py-3 text-slate-600">66 كجم</td><td class="py-3"><span class="px-2 py-1 bg-emerald-50 text-emerald-600 text-xs rounded-lg">ممتاز</span></td><td class="py-3"><span class="px-2 py-1 bg-emerald-100 text-emerald-700 text-xs rounded-lg font-bold">نعم</span></td><td class="py-3"><span class="font-black text-emerald-600">88</span></td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ========== COACH DASHBOARD ========== -->
+<section id="screen-coach" class="screen-section hidden pt-24 pb-10">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 mb-8 fade-in-up">
+            <div>
+                <h1 class="text-3xl font-black text-slate-900">لوحة تحكم المدرب</h1>
+                <p class="text-slate-500 mt-1">المدرب: خالد الزهراني | أكاديمية النصر</p>
+            </div>
+            <div class="flex gap-3">
+                <button class="px-4 py-2.5 bg-white border border-slate-200 rounded-full text-sm font-semibold text-slate-600 hover:border-saudi-300 hover:text-saudi-700 transition-all shadow-sm"><i class="fas fa-bell ml-2"></i>إشعارات <span class="bg-rose-500 text-white text-xs px-1.5 py-0.5 rounded-full mr-1">2</span></button>
+                <button class="px-4 py-2.5 green-gradient text-white rounded-full text-sm font-semibold shadow-lg shadow-saudi-600/20 hover:shadow-xl transition-all"><i class="fas fa-plus ml-2"></i>تقرير جديد</button>
+            </div>
+        </div>
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+            <div class="glass-card rounded-3xl p-5 fade-in-up">
+                <div class="flex justify-between items-start mb-3"><div class="w-12 h-12 rounded-2xl bg-saudi-50 flex items-center justify-center"><i class="fas fa-users text-xl text-saudi-600"></i></div></div>
+                <div class="text-3xl font-black text-slate-900">24</div><div class="text-sm text-slate-500">لاعب تحت الإشراف</div>
+            </div>
+            <div class="glass-card rounded-3xl p-5 fade-in-up" style="transition-delay:.05s">
+                <div class="flex justify-between items-start mb-3"><div class="w-12 h-12 rounded-2xl bg-blue-50 flex items-center justify-center"><i class="fas fa-calendar-check text-xl text-blue-600"></i></div></div>
+                <div class="text-3xl font-black text-slate-900">18</div><div class="text-sm text-slate-500">تمرين هذا الشهر</div>
+            </div>
+            <div class="glass-card rounded-3xl p-5 fade-in-up" style="transition-delay:.1s">
+                <div class="flex justify-between items-start mb-3"><div class="w-12 h-12 rounded-2xl bg-amber-50 flex items-center justify-center"><i class="fas fa-chart-line text-xl text-amber-600"></i></div></div>
+                <div class="text-3xl font-black text-slate-900">+12%</div><div class="text-sm text-slate-500">معدل التحسن</div>
+            </div>
+            <div class="glass-card rounded-3xl p-5 fade-in-up" style="transition-delay:.15s">
+                <div class="flex justify-between items-start mb-3"><div class="w-12 h-12 rounded-2xl bg-rose-50 flex items-center justify-center"><i class="fas fa-exclamation-triangle text-xl text-rose-600"></i></div></div>
+                <div class="text-3xl font-black text-slate-900">3</div><div class="text-sm text-slate-500">تنبيهات صحية</div>
+            </div>
+        </div>
+        <div class="grid lg:grid-cols-3 gap-6 mb-8">
+            <div class="lg:col-span-2 glass-card rounded-3xl p-6 fade-in-up">
+                <div class="flex items-center justify-between mb-6">
+                    <h3 class="text-lg font-black text-slate-900">أداء اللاعبين - آخر 30 يوم</h3>
+                    <div class="flex gap-2">
+                        <button class="px-3 py-1.5 rounded-full text-xs font-bold bg-saudi-600 text-white">الكل</button>
+                        <button class="px-3 py-1.5 rounded-full text-xs font-medium bg-slate-100 text-slate-600">U-14</button>
+                        <button class="px-3 py-1.5 rounded-full text-xs font-medium bg-slate-100 text-slate-600">U-17</button>
+                    </div>
+                </div>
+                <div class="h-72"><canvas id="coachPerformanceChart"></canvas></div>
+            </div>
+            <div class="glass-card rounded-3xl p-6 fade-in-up" style="transition-delay:.1s">
+                <h3 class="text-lg font-black text-slate-900 mb-4">اللاعبون الأكثر تطوراً</h3>
+                <div class="space-y-4">
+                    <div class="flex items-center gap-3 p-3 bg-emerald-50 rounded-xl">
+                        <div class="w-10 h-10 rounded-xl bg-emerald-600 flex items-center justify-center text-white font-bold text-sm">فد</div>
+                        <div class="flex-1"><p class="text-sm font-bold text-slate-800">فيصل الدوسري</p><p class="text-xs text-slate-500">حارس مرمى • +18%</p></div>
+                        <span class="text-emerald-600 font-black">92</span>
+                    </div>
+                    <div class="flex items-center gap-3 p-3 bg-blue-50 rounded-xl">
+                        <div class="w-10 h-10 rounded-xl bg-blue-600 flex items-center justify-center text-white font-bold text-sm">مع</div>
+                        <div class="flex-1"><p class="text-sm font-bold text-slate-800">محمد العتيبي</p><p class="text-xs text-slate-500">سباح حر • +15%</p></div>
+                        <span class="text-blue-600 font-black">88</span>
+                    </div>
+                    <div class="flex items-center gap-3 p-3 bg-amber-50 rounded-xl">
+                        <div class="w-10 h-10 rounded-xl bg-amber-500 flex items-center justify-center text-white font-bold text-sm">عس</div>
+                        <div class="flex-1"><p class="text-sm font-bold text-slate-800">عمر السهلي</p><p class="text-xs text-slate-500">مهاجم • +12%</p></div>
+                        <span class="text-amber-600 font-black">85</span>
+                    </div>
+                    <div class="flex items-center gap-3 p-3 bg-slate-50 rounded-xl">
+                        <div class="w-10 h-10 rounded-xl bg-slate-400 flex items-center justify-center text-white font-bold text-sm">يح</div>
+                        <div class="flex-1"><p class="text-sm font-bold text-slate-800">ياسر الحربي</p><p class="text-xs text-slate-500">تنس • +10%</p></div>
+                        <span class="text-slate-600 font-black">83</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="glass-card rounded-3xl p-6 fade-in-up">
+            <div class="flex items-center justify-between mb-6">
+                <h3 class="text-lg font-black text-slate-900">تقارير التدريب الأخيرة</h3>
+                <button class="px-4 py-2 bg-saudi-50 text-saudi-700 rounded-xl text-sm font-semibold"><i class="fas fa-plus ml-1"></i>تقرير جديد</button>
+            </div>
+            <div class="space-y-3">
+                <div class="flex items-center justify-between p-4 bg-slate-50 rounded-2xl hover:bg-slate-100 transition-all cursor-pointer">
+                    <div class="flex items-center gap-4">
+                        <div class="w-12 h-12 rounded-xl bg-saudi-100 flex items-center justify-center"><i class="fas fa-futbol text-saudi-600"></i></div>
+                        <div>
+                            <p class="font-bold text-slate-800">تمرين تكتيكي - مجموعة U-14</p>
+                            <p class="text-xs text-slate-500">التاريخ: 18 أغسطس 2026 | المدة: 90 دقيقة</p>
+                        </div>
+                    </div>
+                    <span class="px-3 py-1 bg-emerald-50 text-emerald-700 text-xs rounded-full font-bold">مكتمل</span>
+                </div>
+                <div class="flex items-center justify-between p-4 bg-slate-50 rounded-2xl hover:bg-slate-100 transition-all cursor-pointer">
+                    <div class="flex items-center gap-4">
+                        <div class="w-12 h-12 rounded-xl bg-blue-100 flex items-center justify-center"><i class="fas fa-swimmer text-blue-600"></i></div>
+                        <div>
+                            <p class="font-bold text-slate-800">تمرين سباحة - تحمل</p>
+                            <p class="text-xs text-slate-500">التاريخ: 17 أغسطس 2026 | المدة: 60 دقيقة</p>
+                        </div>
+                    </div>
+                    <span class="px-3 py-1 bg-emerald-50 text-emerald-700 text-xs rounded-full font-bold">مكتمل</span>
+                </div>
+                <div class="flex items-center justify-between p-4 bg-slate-50 rounded-2xl hover:bg-slate-100 transition-all cursor-pointer">
+                    <div class="flex items-center gap-4">
+                        <div class="w-12 h-12 rounded-xl bg-amber-100 flex items-center justify-center"><i class="fas fa-dumbbell text-amber-600"></i></div>
+                        <div>
+                            <p class="font-bold text-slate-800">تمرين لياقة بدنية - قوة</p>
+                            <p class="text-xs text-slate-500">التاريخ: 16 أغسطس 2026 | المدة: 45 دقيقة</p>
+                        </div>
+                    </div>
+                    <span class="px-3 py-1 bg-amber-50 text-amber-700 text-xs rounded-full font-bold">قيد المراجعة</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ========== ATHLETE PROFILE ========== -->
+<section id="screen-athlete" class="screen-section hidden pt-24 pb-10">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="grid lg:grid-cols-3 gap-6 mb-8">
+            <div class="lg:col-span-1 fade-in-up">
+                <div class="glass-card rounded-3xl p-6 text-center">
+                    <div class="w-24 h-24 mx-auto mb-4 rounded-3xl bg-saudi-600 flex items-center justify-center text-white text-3xl font-bold shadow-lg">أخ</div>
+                    <h2 class="text-2xl font-black text-slate-900 mb-1">أحمد الخالد</h2>
+                    <p class="text-slate-500 text-sm mb-4">وسط مهاجم • أكاديمية النصر</p>
+                    <div class="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-saudi-50 text-saudi-700 text-sm font-bold mb-4">
+                        <span class="w-2 h-2 rounded-full bg-saudi-500 animate-pulse"></span>نشط الآن
+                    </div>
+                    <div class="grid grid-cols-2 gap-3 mb-4">
+                        <div class="bg-slate-50 rounded-xl p-3"><div class="text-lg font-black text-slate-800">16</div><div class="text-xs text-slate-500">سنة</div></div>
+                        <div class="bg-slate-50 rounded-xl p-3"><div class="text-lg font-black text-slate-800">68</div><div class="text-xs text-slate-500">كجم</div></div>
+                        <div class="bg-slate-50 rounded-xl p-3"><div class="text-lg font-black text-slate-800">175</div><div class="text-xs text-slate-500">سم</div></div>
+                        <div class="bg-slate-50 rounded-xl p-3"><div class="text-lg font-black text-slate-800">3</div><div class="text-xs text-slate-500">سنوات خبرة</div></div>
+                    </div>
+                    <div class="relative w-36 h-36 mx-auto mb-4">
+                        <svg class="w-full h-full" viewBox="0 0 140 140">
+                            <circle cx="70" cy="70" r="60" fill="none" stroke="#e2e8f0" stroke-width="10"/>
+                            <circle cx="70" cy="70" r="60" fill="none" stroke="#006C35" stroke-width="10" stroke-dasharray="283" stroke-dashoffset="99" stroke-linecap="round" transform="rotate(-90 70 70)"/>
+                        </svg>
+                        <div class="absolute inset-0 flex flex-col items-center justify-center">
+                            <div class="text-3xl font-black text-slate-800">65</div>
+                            <div class="text-xs text-slate-500">مؤشر مِراس</div>
+                        </div>
+                    </div>
+                    <p class="text-xs text-rose-600 bg-rose-50 rounded-xl p-2 mb-3"><i class="fas fa-exclamation-circle ml-1"></i>إجهاد / نوم منخفض</p>
+                    <button class="w-full py-3 green-gradient text-white rounded-xl font-bold shadow-lg shadow-saudi-600/20 hover:shadow-xl transition-all">تحديث البيانات</button>
+                </div>
+            </div>
+            <div class="lg:col-span-2 space-y-6">
+                <div class="glass-card rounded-3xl p-6 fade-in-up">
+                    <h3 class="text-lg font-black text-slate-900 mb-4">مؤشرات الأداء الشهرية</h3>
+                    <div class="h-64"><canvas id="athleteRadarChart"></canvas></div>
+                </div>
+                <div class="grid md:grid-cols-2 gap-6">
+                    <div class="glass-card rounded-3xl p-6 fade-in-up" style="transition-delay:.05s">
+                        <h3 class="text-lg font-black text-slate-900 mb-4">النوم (7 أيام)</h3>
+                        <div class="h-48"><canvas id="sleepChart"></canvas></div>
+                    </div>
+                    <div class="glass-card rounded-3xl p-6 fade-in-up" style="transition-delay:.1s">
+                        <h3 class="text-lg font-black text-slate-900 mb-4">معدل النبض (HRV)</h3>
+                        <div class="h-48"><canvas id="hrvChart"></canvas></div>
+                    </div>
+                </div>
+                <div class="glass-card rounded-3xl p-6 fade-in-up" style="transition-delay:.15s">
+                    <h3 class="text-lg font-black text-slate-900 mb-4">الإنجازات والجوائز</h3>
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        <div class="text-center p-4 bg-gold-50 rounded-2xl border border-gold-100">
+                            <div class="text-3xl mb-2">🥇</div>
+                            <p class="text-sm font-bold text-slate-800">هداف البطولة</p>
+                            <p class="text-xs text-slate-500">2025</p>
+                        </div>
+                        <div class="text-center p-4 bg-slate-50 rounded-2xl border border-slate-100">
+                            <div class="text-3xl mb-2">⚽</div>
+                            <p class="text-sm font-bold text-slate-800">12 هدف</p>
+                            <p class="text-xs text-slate-500">هذا الموسم</p>
+                        </div>
+                        <div class="text-center p-4 bg-blue-50 rounded-2xl border border-blue-100">
+                            <div class="text-3xl mb-2">🏃</div>
+                            <p class="text-sm font-bold text-slate-800">28 كم</p>
+                            <p class="text-xs text-slate-500">إجمالي الجري</p>
+                        </div>
+                        <div class="text-center p-4 bg-emerald-50 rounded-2xl border border-emerald-100">
+                            <div class="text-3xl mb-2">📅</div>
+                            <p class="text-sm font-bold text-slate-800">95%</p>
+                            <p class="text-xs text-slate-500">نسبة الحضور</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ========== PARENT DASHBOARD ========== -->
+<section id="screen-parent" class="screen-section hidden pt-24 pb-10">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4 mb-8 fade-in-up">
+            <div>
+                <h1 class="text-3xl font-black text-slate-900">لوحة ولي الأمر</h1>
+                <p class="text-slate-500 mt-1">متابعة أداء الابن الرياضي والصحي</p>
+            </div>
+            <div class="flex gap-3">
+                <button class="px-4 py-2.5 bg-white border border-slate-200 rounded-full text-sm font-semibold text-slate-600 hover:border-saudi-300 hover:text-saudi-700 transition-all shadow-sm"><i class="fas fa-bell ml-2"></i>إشعارات <span class="bg-rose-500 text-white text-xs px-1.5 py-0.5 rounded-full mr-1">1</span></button>
+                <button class="px-4 py-2.5 green-gradient text-white rounded-full text-sm font-semibold shadow-lg shadow-saudi-600/20 hover:shadow-xl transition-all"><i class="fas fa-comments ml-2"></i>تواصل مع المدرب</button>
+            </div>
+        </div>
+        <div class="grid lg:grid-cols-3 gap-6 mb-8">
+            <div class="lg:col-span-1 fade-in-up">
+                <div class="glass-card rounded-3xl p-6">
+                    <div class="text-center mb-6">
+                        <div class="w-20 h-20 mx-auto mb-3 rounded-2xl bg-saudi-600 flex items-center justify-center text-white text-2xl font-bold shadow-lg">أخ</div>
+                        <h3 class="text-xl font-black text-slate-900">أحمد الخالد</h3>
+                        <p class="text-sm text-slate-500">الصف العاشر • أكاديمية النصر</p>
+                    </div>
+                    <div class="space-y-3 mb-6">
+                        <div class="flex justify-between items-center p-3 bg-slate-50 rounded-xl">
+                            <span class="text-sm text-slate-600">مؤشر مِراس</span>
+                            <span class="font-black text-rose-600">65</span>
+                        </div>
+                        <div class="flex justify-between items-center p-3 bg-slate-50 rounded-xl">
+                            <span class="text-sm text-slate-600">الجاهزية</span>
+                            <span class="font-black text-amber-600">78%</span>
+                        </div>
+                        <div class="flex justify-between items-center p-3 bg-slate-50 rounded-xl">
+                            <span class="text-sm text-slate-600">الحضور الدراسي</span>
+                            <span class="font-black text-emerald-600">92%</span>
+                        </div>
+                        <div class="flex justify-between items-center p-3 bg-slate-50 rounded-xl">
+                            <span class="text-sm text-slate-600">الحضور التدريبي</span>
+                            <span class="font-black text-saudi-600">88%</span>
+                        </div>
+                    </div>
+                    <div class="p-4 bg-rose-50 rounded-2xl border border-rose-100">
+                        <div class="flex items-center gap-2 mb-2"><i class="fas fa-exclamation-triangle text-rose-600"></i><span class="font-bold text-rose-700 text-sm">تنبيه صحي</span></div>
+                        <p class="text-xs text-rose-600 leading-relaxed">مستوى النوم منخفض (5.2 ساعة/ليلة). يُنصح بزيادة ساعات النوم إلى 8 ساعات.</p>
+                    </div>
+                </div>
+            </div>
+            <div class="lg:col-span-2 space-y-6">
+                <div class="glass-card rounded-3xl p-6 fade-in-up">
+                    <h3 class="text-lg font-black text-slate-900 mb-4">التطور الشهري</h3>
+                    <div class="h-64"><canvas id="parentProgressChart"></canvas></div>
+                </div>
+                <div class="grid md:grid-cols-2 gap-6">
+                    <div class="glass-card rounded-3xl p-6 fade-in-up" style="transition-delay:.05s">
+                        <h3 class="text-lg font-black text-slate-900 mb-4">النوم والتعافي</h3>
+                        <div class="space-y-3">
+                            <div>
+                                <div class="flex justify-between text-sm mb-1"><span class="text-slate-600">جودة النوم</span><span class="font-bold text-rose-600">45%</span></div>
+                                <div class="h-2 bg-slate-100 rounded-full overflow-hidden"><div class="h-full bg-rose-500 rounded-full" style="width:45%"></div></div>
+                            </div>
+                            <div>
+                                <div class="flex justify-between text-sm mb-1"><span class="text-slate-600">معدل التعافي (HRV)</span><span class="font-bold text-amber-600">62%</span></div>
+                                <div class="h-2 bg-slate-100 rounded-full overflow-hidden"><div class="h-full bg-amber-500 rounded-full" style="width:62%"></div></div>
+                            </div>
+                            <div>
+                                <div class="flex justify-between text-sm mb-1"><span class="text-slate-600">الإرهاق</span><span class="font-bold text-rose-600">عالٍ</span></div>
+                                <div class="h-2 bg-slate-100 rounded-full overflow-hidden"><div class="h-full bg-rose-500 rounded-full" style="width:78%"></div></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="glass-card rounded-3xl p-6 fade-in-up" style="transition-delay:.1s">
+                        <h3 class="text-lg font-black text-slate-900 mb-4">التغذية والنشاط</h3>
+                        <div class="space-y-3">
+                            <div>
+                                <div class="flex justify-between text-sm mb-1"><span class="text-slate-600">السعرات المستهلكة</span><span class="font-bold text-emerald-600">2,400/2,800</span></div>
+                                <div class="h-2 bg-slate-100 rounded-full overflow-hidden"><div class="h-full bg-emerald-500 rounded-full" style="width:85%"></div></div>
+                            </div>
+                            <div>
+                                <div class="flex justify-between text-sm mb-1"><span class="text-slate-600">البروتين (g)</span><span class="font-bold text-emerald-600">120/140</span></div>
+                                <div class="h-2 bg-slate-100 rounded-full overflow-hidden"><div class="h-full bg-emerald-500 rounded-full" style="width:86%"></div></div>
+                            </div>
+                            <div>
+                                <div class="flex justify-between text-sm mb-1"><span class="text-slate-600">الماء (لتر)</span><span class="font-bold text-amber-600">2.1/3.0</span></div>
+                                <div class="h-2 bg-slate-100 rounded-full overflow-hidden"><div class="h-full bg-amber-500 rounded-full" style="width:70%"></div></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="glass-card rounded-3xl p-6 fade-in-up" style="transition-delay:.15s">
+                    <h3 class="text-lg font-black text-slate-900 mb-4">التحصيل الدراسي</h3>
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                        <div class="text-center p-4 bg-blue-50 rounded-2xl">
+                            <div class="text-2xl font-black text-blue-700">88%</div>
+                            <div class="text-xs text-slate-500">الرياضيات</div>
+                        </div>
+                        <div class="text-center p-4 bg-saudi-50 rounded-2xl">
+                            <div class="text-2xl font-black text-saudi-700">92%</div>
+                            <div class="text-xs text-slate-500">العلوم</div>
+                        </div>
+                        <div class="text-center p-4 bg-amber-50 rounded-2xl">
+                            <div class="text-2xl font-black text-amber-700">85%</div>
+                            <div class="text-xs text-slate-500">اللغة العربية</div>
+                        </div>
+                        <div class="text-center p-4 bg-purple-50 rounded-2xl">
+                            <div class="text-2xl font-black text-purple-700">90%</div>
+                            <div class="text-xs text-slate-500">اللغة الإنجليزية</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- ========== CHAT SCREEN ========== -->
+<section id="screen-chat" class="screen-section hidden pt-24 pb-10">
+    <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="glass-card rounded-3xl overflow-hidden fade-in-up" style="height: calc(100vh - 120px);">
+            <div class="flex h-full">
+                <div class="w-full md:w-80 border-l border-slate-100 bg-slate-50/50 hidden md:flex flex-col">
+                    <div class="p-4 border-b border-slate-100">
+                        <h3 class="font-black text-slate-900">المحادثات</h3>
+                    </div>
+                    <div class="flex-1 overflow-y-auto p-2 space-y-1">
+                        <div class="flex items-center gap-3 p-3 bg-white rounded-xl cursor-pointer border border-saudi-200 shadow-sm">
+                            <div class="w-10 h-10 rounded-xl bg-saudi-600 flex items-center justify-center text-white font-bold text-sm shrink-0">خز</div>
+                            <div class="flex-1 min-w-0">
+                                <p class="text-sm font-bold text-slate-800 truncate">خالد الزهراني</p>
+                                <p class="text-xs text-slate-500 truncate">المدير الفني - أكاديمية النصر</p>
+                            </div>
+                            <span class="w-2 h-2 rounded-full bg-emerald-500 shrink-0"></span>
+                        </div>
+                        <div class="flex items-center gap-3 p-3 hover:bg-white rounded-xl cursor-pointer transition-all">
+                            <div class="w-10 h-10 rounded-xl bg-blue-500 flex items-center justify-center text-white font-bold text-sm shrink-0">أم</div>
+                            <div class="flex-1 min-w-0">
+                                <p class="text-sm font-bold text-slate-800 truncate">أمير المالكي</p>
+                                <p class="text-xs text-slate-500 truncate">مدرب اللياقة</p>
+                            </div>
+                            <span class="w-2 h-2 rounded-full bg-emerald-500 shrink-0"></span>
+                        </div>
+                        <div class="flex items-center gap-3 p-3 hover:bg-white rounded-xl cursor-pointer transition-all">
+                            <div class="w-10 h-10 rounded-xl bg-gold-500 flex items-center justify-center text-white font-bold text-sm shrink-0">دع</div>
+                            <div class="flex-1 min-w-0">
+                                <p class="text-sm font-bold text-slate-800 truncate">د. عبدالرحمن العتيبي</p>
+                                <p class="text-xs text-slate-500 truncate">أخصائي تغذية</p>
+                            </div>
+                            <span class="w-2 h-2 rounded-full bg-slate-300 shrink-0"></span>
+                        </div>
+                    </div>
+                </div>
+                <div class="flex-1 flex flex-col">
+                    <div class="p-4 border-b border-slate-100 flex items-center gap-3">
+                        <div class="w-10 h-10 rounded-xl bg-saudi-600 flex items-center justify-center text-white font-bold text-sm">خز</div>
+                        <div>
+                            <p class="font-bold text-slate-800">خالد الزهراني</p>
+                            <p class="text-xs text-slate-500">المدير الفني - أكاديمية النصر</p>
+                        </div>
+                    </div>
+                    <div class="flex-1 overflow-y-auto p-4 space-y-4" id="chat-messages">
+                        <div class="chat-bubble received">
+                            <p>السلام عليكم أحمد، لاحظت انخفاضاً في مؤشر النوم لديك هذا الأسبوع. هل تواجه أي صعوبات؟</p>
+                            <span class="text-[10px] text-slate-400 mt-1 block">10:30 ص</span>
+                        </div>
+                        <div class="chat-bubble sent">
+                            <p>وعليكم السلام coach، نعم أختبر قليلاً بسبب الامتحانات المدرسية.</p>
+                            <span class="text-[10px] text-white/70 mt-1 block">10:32 ص</span>
+                        </div>
+                        <div class="chat-bubble received">
+                            <p>أفهم ذلك. حاول أن تنام 7-8 ساعات على الأقل. النوم مهم جداً للتعافي والأداء. هل تحتاج أي نصائح للدراسة؟</p>
+                            <span class="text-[10px] text-slate-400 mt-1 block">10:33 ص</span>
+                        </div>
+                        <div class="chat-bubble sent">
+                            <p>شكراً لك coach، سأحاول تنظيم وقتي بشكل أفضل. هل يمكن تأجيل التمرين غداً إلى المساء؟</p>
+                            <span class="text-[10px] text-white/70 mt-1 block">10:35 ص</span>
+                        </div>
+                        <div class="chat-bubble received">
+                            <p>بالطبع، سأقوم بتحديث الجدول. ركز على دراستك ونومك أولاً 💪</p>
+                            <span class="text-[10px] text-slate-400 mt-1 block">10:36 ص</span>
+                        </div>
+                    </div>
+                    <div class="p-4 border-t border-slate-100">
+                        <div class="flex items-center gap-3">
+                            <button class="w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center text-slate-500 hover:bg-slate-200 transition-all"><i class="fas fa-paperclip"></i></button>
+                            <input type="text" id="chat-input" placeholder="اكتب رسالتك هنا..." class="flex-1 px-4 py-3 rounded-xl border border-slate-200 focus:border-saudi-500 focus:ring-2 focus:ring-saudi-200 outline-none transition-all text-right">
+                            <button onclick="sendChatMessage()" class="w-10 h-10 rounded-xl green-gradient flex items-center justify-center text-white hover:shadow-lg transition-all"><i class="fas fa-paper-plane"></i></button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Footer -->
+<footer class="bg-slate-900 text-white pt-16 pb-8 mt-10">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="grid md:grid-cols-4 gap-8 mb-12">
+            <div>
+                <div class="flex items-center gap-3 mb-4">
+<img src="miras1.png" alt="شعار مِراس" class="w-10 h-10 object-contain rounded-xl shadow-lg shadow-saudi-600/20">
+                    <div><span class="text-xl font-bold">مِراس</span><span class="text-xs text-slate-400 block -mt-1">Miras OS</span></div>
+                </div>
+                <p class="text-slate-400 text-sm leading-relaxed">نظام التشغيل الذكي للمدارس والأكاديميات الرياضية. نربط بين الأداء الرياضي والصحة والتحصيل الدراسي.</p>
+            </div>
+            <div>
+                <h4 class="font-bold mb-4">روابط سريعة</h4>
+                <ul class="space-y-2 text-sm text-slate-400">
+                    <li><button onclick="showScreen('landing')" class="hover:text-gold-400 transition-all">الرئيسية</button></li>
+                    <li><button onclick="showScreen('cup')" class="hover:text-gold-400 transition-all">كأس مِراس</button></li>
+                    <li><button onclick="showScreen('map')" class="hover:text-gold-400 transition-all">الخريطة الوطنية</button></li>
+                    <li><button onclick="showScreen('school')" class="hover:text-gold-400 transition-all">لوحة المدرسة</button></li>
+                </ul>
+            </div>
+            <div>
+                <h4 class="font-bold mb-4">الحسابات</h4>
+                <ul class="space-y-2 text-sm text-slate-400">
+                    <li><button onclick="showScreen('login');selectLoginType('school')" class="hover:text-gold-400 transition-all">حساب مدرسة</button></li>
+                    <li><button onclick="showScreen('login');selectLoginType('coach')" class="hover:text-gold-400 transition-all">حساب مدرب</button></li>
+                    <li><button onclick="showScreen('login');selectLoginType('parent')" class="hover:text-gold-400 transition-all">حساب ولي أمر</button></li>
+                    <li><button onclick="showScreen('login');selectLoginType('athlete')" class="hover:text-gold-400 transition-all">حساب لاعب</button></li>
+                </ul>
+            </div>
+            <div>
+                <h4 class="font-bold mb-4">تواصل معنا</h4>
+                <ul class="space-y-2 text-sm text-slate-400">
+                    <li><i class="fas fa-envelope ml-2 text-saudi-500"></i>mayaahmad1426@gmail.com</li>
+                    <li><i class="fas fa-phone ml-2 text-saudi-500"></i>0592005867</li>
+                    <li><i class="fas fa-map-marker-alt ml-2 text-saudi-500"></i>المدينة المنورة، المملكة العربية السعودية</li>
+                </ul>
+                <div class="flex gap-3 mt-4">
+                    <a href="#" class="w-8 h-8 rounded-lg bg-slate-800 flex items-center justify-center hover:bg-saudi-600 transition-all"><i class="fab fa-twitter text-sm"></i></a>
+                    <a href="#" class="w-8 h-8 rounded-lg bg-slate-800 flex items-center justify-center hover:bg-saudi-600 transition-all"><i class="fab fa-instagram text-sm"></i></a>
+                    <a href="#" class="w-8 h-8 rounded-lg bg-slate-800 flex items-center justify-center hover:bg-saudi-600 transition-all"><i class="fab fa-youtube text-sm"></i></a>
+                </div>
+            </div>
+        </div>
+        <div class="border-t border-slate-800 pt-8 text-center">
+            <p class="text-slate-500 text-sm">© 2026 مِراس Miras OS. جميع الحقوق محفوظة.</p>
+        </div>
+    </div>
+</footer>
+
+<script>
+// ===== NAVIGATION =====
+var currentUser = null;
+var currentRole = null;
+var selectedLoginType = null;
+
+function showScreen(screenName) {
+    document.querySelectorAll('.screen-section').forEach(function(s) { s.classList.add('hidden'); });
+    var target = document.getElementById('screen-' + screenName);
+    if (target) {
+        target.classList.remove('hidden');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+    document.querySelectorAll('.nav-link').forEach(function(l) { l.classList.remove('active'); });
+    var navBtn = document.getElementById('nav-' + screenName);
+    if (navBtn) navBtn.classList.add('active');
+    document.getElementById('mobile-menu').classList.add('hidden');
+    if (screenName === 'map') initMapCharts();
+    if (screenName === 'school') initSchoolCharts();
+    if (screenName === 'coach') initCoachCharts();
+    if (screenName === 'athlete') initAthleteCharts();
+    if (screenName === 'parent') initParentCharts();
+}
+
+function toggleMobileMenu() {
+    document.getElementById('mobile-menu').classList.toggle('hidden');
+}
+
+function selectLoginType(type) {
+    selectedLoginType = type;
+    var display = document.getElementById('login-type-display');
+    var icon = document.getElementById('login-type-icon');
+    var text = document.getElementById('login-type-text');
+    var types = {
+        school: { icon: 'fa-school', text: 'حساب مدرسة', color: 'text-blue-600', bg: 'bg-blue-50' },
+        coach: { icon: 'fa-user-tie', text: 'حساب مدرب', color: 'text-saudi-600', bg: 'bg-saudi-50' },
+        parent: { icon: 'fa-user-friends', text: 'حساب ولي أمر', color: 'text-gold-600', bg: 'bg-gold-50' },
+        athlete: { icon: 'fa-running', text: 'حساب لاعب', color: 'text-emerald-600', bg: 'bg-emerald-50' }
+    };
+    var t = types[type];
+    if (t && display) {
+        display.classList.remove('hidden');
+        icon.className = 'fas ' + t.icon + ' text-xl ' + t.color;
+        icon.parentElement.className = 'w-12 h-12 mx-auto mb-2 rounded-xl ' + t.bg + ' flex items-center justify-center';
+        text.textContent = t.text;
+    }
+}
+
+function performLogin() {
+    var user = document.getElementById('login-user').value.trim();
+    var pass = document.getElementById('login-pass').value.trim();
+    if (!user || !pass) { alert('الرجاء إدخال اسم المستخدم وكلمة المرور'); return; }
+    currentUser = user;
+    currentRole = selectedLoginType || 'coach';
+    document.getElementById('login-btn').classList.add('hidden');
+    document.getElementById('logout-btn').classList.remove('hidden');
+    document.getElementById('user-name').textContent = user;
+    document.getElementById('user-name').classList.remove('hidden');
+    var roleScreens = { school: 'school', coach: 'coach', parent: 'parent', athlete: 'athlete' };
+    showScreen(roleScreens[currentRole] || 'landing');
+}
+
+function guestLogin() {
+    currentUser = 'زائر';
+    currentRole = 'guest';
+    document.getElementById('login-btn').classList.add('hidden');
+    document.getElementById('logout-btn').classList.remove('hidden');
+    document.getElementById('user-name').textContent = 'زائر';
+    document.getElementById('user-name').classList.remove('hidden');
+    showScreen('landing');
+}
+
+function logout() {
+    currentUser = null; currentRole = null; selectedLoginType = null;
+    document.getElementById('login-btn').classList.remove('hidden');
+    document.getElementById('logout-btn').classList.add('hidden');
+    document.getElementById('user-name').classList.add('hidden');
+    document.getElementById('user-name').textContent = '';
+    var display = document.getElementById('login-type-display');
+    if (display) display.classList.add('hidden');
+    showScreen('landing');
+}
+
+function sendChatMessage() {
+    var input = document.getElementById('chat-input');
+    var msg = input.value.trim();
+    if (!msg) return;
+    var container = document.getElementById('chat-messages');
+    var time = new Date().toLocaleTimeString('ar-SA', { hour: '2-digit', minute: '2-digit' });
+    var bubble = document.createElement('div');
+    bubble.className = 'chat-bubble sent';
+    bubble.innerHTML = '<p>' + escapeHtml(msg) + '</p><span class="text-[10px] text-white/70 mt-1 block">' + time + '</span>';
+    container.appendChild(bubble);
+    input.value = '';
+    container.scrollTop = container.scrollHeight;
+    setTimeout(function() {
+        var replies = ['تمام، سأقوم بمتابعة ذلك.','ممتاز! استمر في التقدم.','شكراً لمشاركتك، سأراجع البيانات.','حاضر، سأحدثك لاحقاً بالتفاصيل.'];
+        var reply = replies[Math.floor(Math.random() * replies.length)];
+        var replyBubble = document.createElement('div');
+        replyBubble.className = 'chat-bubble received';
+        replyBubble.innerHTML = '<p>' + reply + '</p><span class="text-[10px] text-slate-400 mt-1 block">' + time + '</span>';
+        container.appendChild(replyBubble);
+        container.scrollTop = container.scrollHeight;
+    }, 2000);
+}
+
+function escapeHtml(text) {
+    var div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
+var chatInput = document.getElementById('chat-input');
+if (chatInput) {
+    chatInput.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') sendChatMessage();
+    });
+}
+
+function updateCountdown() {
+    var target = new Date('2026-09-01T00:00:00+03:00');
+    var now = new Date();
+    var diff = target - now;
+    if (diff <= 0) {
+        document.getElementById('cd-days').textContent = '00';
+        document.getElementById('cd-hours').textContent = '00';
+        document.getElementById('cd-minutes').textContent = '00';
+        document.getElementById('cd-seconds').textContent = '00';
+        return;
+    }
+    var days = Math.floor(diff / (1000 * 60 * 60 * 24));
+    var hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+    var minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+    var seconds = Math.floor((diff % (1000 * 60)) / 1000);
+    document.getElementById('cd-days').textContent = String(days).padStart(2, '0');
+    document.getElementById('cd-hours').textContent = String(hours).padStart(2, '0');
+    document.getElementById('cd-minutes').textContent = String(minutes).padStart(2, '0');
+    document.getElementById('cd-seconds').textContent = String(seconds).padStart(2, '0');
+}
+setInterval(updateCountdown, 1000);
+updateCountdown();
+
+function scrollToSection(id) {
+    var el = document.getElementById(id);
+    if (el) el.scrollIntoView({ behavior: 'smooth' });
+}
+
+var observer = new IntersectionObserver(function(entries) {
+    entries.forEach(function(entry) {
+        if (entry.isIntersecting) { entry.target.classList.add('visible'); }
+    });
+}, { threshold: 0.1 });
+document.querySelectorAll('.fade-in-up, .scale-in').forEach(function(el) { observer.observe(el); });
+
+function animateCounters() {
+    document.querySelectorAll('.counter').forEach(function(counter) {
+        var target = parseInt(counter.dataset.target);
+        var duration = 2000;
+        var step = target / (duration / 16);
+        var current = 0;
+        var timer = setInterval(function() {
+            current += step;
+            if (current >= target) {
+                counter.textContent = target.toLocaleString('ar-SA');
+                clearInterval(timer);
+            } else {
+                counter.textContent = Math.floor(current).toLocaleString('ar-SA');
+            }
+        }, 16);
+    });
+}
+
+var countersAnimated = false;
+var landingObserver = new IntersectionObserver(function(entries) {
+    entries.forEach(function(entry) {
+        if (entry.isIntersecting && !countersAnimated) {
+            countersAnimated = true;
+            animateCounters();
+        }
+    });
+});
+var statsSection = document.querySelector('.counter');
+if (statsSection) landingObserver.observe(statsSection.closest('.glass'));
+
+// ===== MAP DATA FOR ALL 13 REGIONS =====
+var regionData = {
+    riyadh: { name: 'الرياض', athletes: 18420, academies: 45, schools: 128, talents: 2340, sports: { football: 8420, basketball: 3210, tennis: 1450, martial: 2180, swimming: 1890 } },
+    makkah: { name: 'مكة المكرمة', athletes: 12850, academies: 32, schools: 98, talents: 1650, sports: { football: 5420, basketball: 2210, tennis: 1250, martial: 1680, swimming: 1290 } },
+    east: { name: 'الشرقية', athletes: 10230, academies: 28, schools: 85, talents: 1320, sports: { football: 4220, basketball: 2810, tennis: 950, martial: 1180, swimming: 1070 } },
+    madinah: { name: 'المدينة المنورة', athletes: 6740, academies: 18, schools: 62, talents: 890, sports: { football: 2820, basketball: 1210, tennis: 650, martial: 980, swimming: 1080 } },
+    aseer: { name: 'عسير', athletes: 4120, academies: 12, schools: 48, talents: 540, sports: { football: 1820, basketball: 810, tennis: 350, martial: 680, swimming: 460 } },
+    qassim: { name: 'القصيم', athletes: 3890, academies: 11, schools: 45, talents: 480, sports: { football: 1620, basketball: 910, tennis: 450, martial: 480, swimming: 430 } },
+    tabuk: { name: 'تبوك', athletes: 2450, academies: 8, schools: 32, talents: 320, sports: { football: 1020, basketball: 510, tennis: 250, martial: 380, swimming: 290 } },
+    hail: { name: 'حائل', athletes: 1980, academies: 6, schools: 28, talents: 260, sports: { football: 820, basketball: 410, tennis: 200, martial: 310, swimming: 240 } },
+    jazan: { name: 'جازان', athletes: 1650, academies: 5, schools: 24, talents: 210, sports: { football: 720, basketball: 310, tennis: 150, martial: 280, swimming: 190 } },
+    najran: { name: 'نجران', athletes: 1320, academies: 4, schools: 20, talents: 170, sports: { football: 520, basketball: 280, tennis: 120, martial: 240, swimming: 160 } },
+    baha: { name: 'الباحة', athletes: 980, academies: 3, schools: 16, talents: 130, sports: { football: 380, basketball: 210, tennis: 90, martial: 180, swimming: 120 } },
+    jawf: { name: 'الجوف', athletes: 890, academies: 3, schools: 15, talents: 110, sports: { football: 350, basketball: 190, tennis: 80, martial: 160, swimming: 110 } },
+    north: { name: 'الحدود الشمالية', athletes: 650, academies: 2, schools: 12, talents: 80, sports: { football: 250, basketball: 140, tennis: 60, martial: 120, swimming: 80 } }
+};
+
+var charts = {};
+
+function initMapCharts() {
+    if (charts.age) return;
+    var ctx = document.getElementById('ageChart');
+    if (!ctx) return;
+    charts.age = new Chart(ctx.getContext('2d'), {
+        type: 'bar',
+        data: { labels: ['U-10','U-12','U-14','U-17','U-20'], datasets: [{ label: 'عدد اللاعبين', data: [8200,15400,18600,9800,4200], backgroundColor: '#006C35', borderRadius: 8 }] },
+        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, grid: { display: false } }, x: { grid: { display: false } } } }
+    });
+}
+
+function selectCity(cityKey) {
+    // Remove active class from all regions
+    document.querySelectorAll('.map-region').forEach(function(r) { r.classList.remove('active'); });
+
+    // Add active class to selected region
+    var selectedRegion = document.querySelector('.map-region[data-city="' + cityKey + '"]');
+    if (selectedRegion) selectedRegion.classList.add('active');
+
+    // Update stats panel
+    var data = regionData[cityKey];
+    if (data) {
+        var statsContainer = document.getElementById('region-stats');
+        if (statsContainer) {
+            statsContainer.innerHTML = 
+                '<div class="p-3 bg-saudi-50 rounded-xl text-center">' +
+                '<div class="text-lg font-black text-saudi-700">' + data.athletes.toLocaleString('ar-SA') + '</div>' +
+                '<div class="text-xs text-slate-500">رياضي</div></div>' +
+                '<div class="p-3 bg-blue-50 rounded-xl text-center">' +
+                '<div class="text-lg font-black text-blue-700">' + data.academies + '</div>' +
+                '<div class="text-xs text-slate-500">أكاديمية</div></div>' +
+                '<div class="p-3 bg-gold-50 rounded-xl text-center">' +
+                '<div class="text-lg font-black text-gold-700">' + data.schools + '</div>' +
+                '<div class="text-xs text-slate-500">مدرسة</div></div>' +
+                '<div class="p-3 bg-emerald-50 rounded-xl text-center">' +
+                '<div class="text-lg font-black text-emerald-700">' + data.talents.toLocaleString('ar-SA') + '</div>' +
+                '<div class="text-xs text-slate-500">موهبة</div></div>';
+        }
+    }
+}
+
+function filterMap(sport) {
+    document.querySelectorAll('[id^="filter-"]').forEach(function(btn) {
+        btn.classList.remove('bg-saudi-600','text-white','shadow-lg','shadow-saudi-600/20');
+        btn.classList.add('bg-white','text-slate-600','border','border-slate-200');
+    });
+    var active = document.getElementById('filter-' + sport);
+    if (active) {
+        active.classList.remove('bg-white','text-slate-600','border','border-slate-200');
+        active.classList.add('bg-saudi-600','text-white','shadow-lg','shadow-saudi-600/20');
+    }
+}
+
+function initSchoolCharts() {
+    if (charts.schoolSport) return;
+    var ctx = document.getElementById('schoolSportChart');
+    if (!ctx) return;
+    charts.schoolSport = new Chart(ctx.getContext('2d'), {
+        type: 'doughnut',
+        data: { labels: ['كرة القدم','كرة السلة','التنس','فنون قتالية','السباحة','أخرى'], datasets: [{ data: [45,20,8,12,10,5], backgroundColor: ['#006C35','#f97316','#eab308','#ef4444','#06b6d4','#94a3b8'], borderWidth: 0 }] },
+        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { font: { family: 'Cairo' }, boxWidth: 12 } } } }
+    });
+}
+
+function initCoachCharts() {
+    if (charts.coachPerf) return;
+    var ctx = document.getElementById('coachPerformanceChart');
+    if (!ctx) return;
+    charts.coachPerf = new Chart(ctx.getContext('2d'), {
+        type: 'line',
+        data: { labels: ['يناير','فبراير','مارس','أبريل','مايو','يونيو','يوليو','أغسطس'], datasets: [{ label: 'معدل الأداء', data: [65,68,72,70,75,78,80,82], borderColor: '#006C35', backgroundColor: 'rgba(0,108,53,0.1)', fill: true, tension: 0.4, pointRadius: 4, pointBackgroundColor: '#006C35' }] },
+        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: false, min: 50, max: 100, grid: { color: '#f1f5f9' } }, x: { grid: { display: false } } } }
+    });
+}
+
+function initAthleteCharts() {
+    if (charts.athleteRadar) return;
+    var radarCtx = document.getElementById('athleteRadarChart');
+    if (radarCtx) {
+        charts.athleteRadar = new Chart(radarCtx.getContext('2d'), {
+            type: 'radar',
+            data: { labels: ['السرعة','القوة','التحمل','المرونة','التركيز','التكتيك'], datasets: [{ label: 'الشهر الحالي', data: [75,68,72,65,80,70], borderColor: '#006C35', backgroundColor: 'rgba(0,108,53,0.2)', pointBackgroundColor: '#006C35' }, { label: 'الشهر الماضي', data: [70,65,68,60,75,65], borderColor: '#C5A059', backgroundColor: 'rgba(197,160,89,0.2)', pointBackgroundColor: '#C5A059' }] },
+            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { font: { family: 'Cairo' } } } }, scales: { r: { beginAtZero: true, max: 100, grid: { color: '#e2e8f0' } } } }
+        });
+    }
+    var sleepCtx = document.getElementById('sleepChart');
+    if (sleepCtx) {
+        charts.sleep = new Chart(sleepCtx.getContext('2d'), {
+            type: 'bar',
+            data: { labels: ['السبت','الأحد','الإثنين','الثلاثاء','الأربعاء','الخميس','الجمعة'], datasets: [{ label: 'ساعات النوم', data: [5.5,6.2,5.8,5.2,6.5,7.0,8.2], backgroundColor: '#6366f1', borderRadius: 6 }] },
+            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, max: 10, grid: { display: false } }, x: { grid: { display: false } } } }
+        });
+    }
+    var hrvCtx = document.getElementById('hrvChart');
+    if (hrvCtx) {
+        charts.hrv = new Chart(hrvCtx.getContext('2d'), {
+            type: 'line',
+            data: { labels: ['1','5','10','15','20','25','30'], datasets: [{ label: 'HRV', data: [45,48,42,40,44,46,43], borderColor: '#06b6d4', backgroundColor: 'rgba(6,182,212,0.1)', fill: true, tension: 0.4, pointRadius: 3 }] },
+            options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: false, grid: { color: '#f1f5f9' } }, x: { grid: { display: false }, title: { display: true, text: 'أغسطس' } } } }
+        });
+    }
+}
+
+function initParentCharts() {
+    if (charts.parentProg) return;
+    var ctx = document.getElementById('parentProgressChart');
+    if (!ctx) return;
+    charts.parentProg = new Chart(ctx.getContext('2d'), {
+        type: 'line',
+        data: { labels: ['يناير','فبراير','مارس','أبريل','مايو','يونيو','يوليو','أغسطس'], datasets: [{ label: 'مؤشر مِراس', data: [58,62,60,65,68,70,72,65], borderColor: '#006C35', backgroundColor: 'rgba(0,108,53,0.1)', fill: true, tension: 0.4, pointRadius: 4 }, { label: 'التحصيل الدراسي', data: [85,86,84,88,87,89,90,88], borderColor: '#C5A059', backgroundColor: 'rgba(197,160,89,0.1)', fill: true, tension: 0.4, pointRadius: 4 }] },
+        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { font: { family: 'Cairo' } } } }, scales: { y: { beginAtZero: false, min: 40, max: 100, grid: { color: '#f1f5f9' } }, x: { grid: { display: false } } } }
+    });
+}
+
+window.addEventListener('scroll', function() {
+    var nav = document.getElementById('navbar');
+    if (window.scrollY > 50) { nav.classList.add('shadow-lg'); } else { nav.classList.remove('shadow-lg'); }
+});
+</script>
+</body>
+</html>
